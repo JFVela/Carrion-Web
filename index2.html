@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body {
+        font-family: Arial;
+        margin: 40px;
+        text-align: center;
+    }
+
+    select,
+    button {
+        font-size: 18px;
+        padding: 5px 10px;
+    }
+
+    .pregunta {
+        margin-top: 20px;
+        font-size: 20px;
+    }
+
+    .input-x {
+        margin: 15px;
+    }
+
+    .resultado {
+        font-size: 22px;
+        margin-top: 20px;
+    }
+</style>
+</head>
+
+<body>
+
+    <h1>Ejercicios de Segmentos Geométricos</h1>
+
+    <label for="segmentos">Número de puntos (mínimo 2): </label>
+    <select id="segmentos">
+        <option value="3">ABC</option>
+        <option value="4">ABCD</option>
+        <option value="5">ABCDE</option>
+        <option value="6">ABCDEF</option>
+    </select>
+    <button onclick="generarEjercicio()">Generar ejercicio</button>
+
+    <div class="pregunta" id="pregunta"></div>
+    <div class="input-x" id="inputX" style="display: none;">
+        <input type="number" id="respuestaUsuario" placeholder="Ingresa el valor de X">
+        <button onclick="verificarRespuesta()">Verificar</button>
+    </div>
+    <div class="resultado" id="resultado"></div>
+
+    <script>
+        let valorCorrecto = 0;
+
+        function generarEjercicio() {
+            const puntos = ['A', 'B', 'C', 'D', 'E', 'F'];
+            const cant = parseInt(document.getElementById('segmentos').value);
+            const letras = puntos.slice(0, cant);
+            const segmentos = [];
+
+            // Elegimos aleatoriamente en qué segmento irá la incógnita
+            const posX = Math.floor(Math.random() * (cant - 1));
+            const coefX = Math.floor(Math.random() * 5) + 2; // 2x a 6x
+            let total = 0;
+
+            for (let i = 0; i < cant - 1; i++) {
+                if (i === posX) {
+                    segmentos.push(`${coefX}x`);
+                    total += coefX * 1; // Por ahora X = 1, ajustamos luego
+                } else {
+                    let valor = Math.floor(Math.random() * 10) + 2;
+                    segmentos.push(valor);
+                    total += valor;
+                }
+            }
+
+            // Para que X no sea siempre 1, redefinimos un valor realista
+            const nuevoX = Math.floor(Math.random() * 6) + 2;
+            valorCorrecto = nuevoX;
+            const nuevoTotal = total - coefX + (coefX * nuevoX);
+
+            // Generar texto de la pregunta
+            let texto = `El segmento ${letras.join('')} está formado por:<br>`;
+            for (let i = 0; i < segmentos.length; i++) {
+                texto += `${letras[i]}${letras[i + 1]} = ${segmentos[i]}<br>`;
+            }
+            texto += `Si se sabe que el total del segmento ${letras.join('')} es ${nuevoTotal}, ¿cuánto vale X?`;
+
+            document.getElementById('pregunta').innerHTML = texto;
+            document.getElementById('inputX').style.display = 'block';
+            document.getElementById('resultado').innerHTML = '';
+        }
+
+        function verificarRespuesta() {
+            const usuario = parseFloat(document.getElementById('respuestaUsuario').value);
+            const res = document.getElementById('resultado');
+            if (usuario === valorCorrecto) {
+                res.innerHTML = '✔ ¡Correcto! X = ' + valorCorrecto;
+                res.style.color = 'green';
+            } else {
+                res.innerHTML = '✘ Incorrecto. La respuesta correcta era X = ' + valorCorrecto;
+                res.style.color = 'red';
+            }
+        }
+    </script>
+
+</body>
+
+</html>
