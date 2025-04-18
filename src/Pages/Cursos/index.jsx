@@ -213,7 +213,7 @@ const profesores = ["Prof. García", "Prof. López"];
 
 // Array de notas (cada fila es un curso, cada columna son las notas: [promedio, b1, b2, b3, b4, tareas])
 const notas = [
-  [17.5, 16, 18, 17, 10, 15],
+  [17.5, 16, 18, 17, 10, 20],
   [15.2, 14, 15, 16, 17, 19],
   [15.2, 14, 15, 16, 17, 19],
   [15.2, 14, 15, 16, 17, 19],
