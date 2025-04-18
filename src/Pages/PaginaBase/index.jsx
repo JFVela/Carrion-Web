@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import { TabContext, TabList } from "@mui/lab";
 
+
 function PaginaBase() {
   const location = useLocation();
   const navigate = useNavigate();
