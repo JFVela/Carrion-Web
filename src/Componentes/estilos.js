@@ -134,5 +134,61 @@ export const StyledAccordion = styled(Accordion)({
   borderRadius: "8px !important",
   "&.Mui-expanded": {
     marginBottom: "16px",
-  },
+  }
 });
+
+
+// Styled de la Pagina Inicio
+
+const Encabezado = styled.div`
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #343a40;
+`;
+
+const Bordes = styled.div`
+  border: 1px solid #343a40;
+  width: 48%;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px;
+
+  @media screen and (max-width: 1100px) {
+    width: 100%;
+  }
+`;
+
+const Titulo = styled.h2`
+  font-size: 24px;
+  font-weight: bold;
+  color: #343a40;
+  text-align: center;
+  margin-top: 20px;
+`;
+
+const Titulo2 = styled.h2`
+  font-size: 18px;
+  font-weight: bold;
+  color: #7b7b7b;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+`;
+
+const Contenido = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  margin: 10px;
+  border: 1px solid #343a40;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+`;
+
+export { Encabezado, Bordes, Titulo, Titulo2, Contenido };
