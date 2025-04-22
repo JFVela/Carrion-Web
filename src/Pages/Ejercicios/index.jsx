@@ -17,8 +17,16 @@ import {
   createTheme,
   CssBaseline,
 } from "@mui/material";
-import { CalculateOutlined, RefreshOutlined, EmojiEvents } from "@mui/icons-material";
+import {
+  CalculateOutlined,
+  RefreshOutlined,
+  EmojiEvents,
+} from "@mui/icons-material";
 import Swal from "sweetalert2";
+
+// Importar tabs
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
 // Tema personalizado
 const theme = createTheme({
@@ -33,8 +41,16 @@ const theme = createTheme({
     h1: { fontWeight: 700, fontSize: "2.5rem" },
   },
   components: {
-    MuiButton: { styleOverrides: { root: { borderRadius: 8, textTransform: "none", fontWeight: 600 } } },
-    MuiPaper: { styleOverrides: { root: { borderRadius: 16, boxShadow: "0 8px 24px rgba(0,0,0,0.12)" } } },
+    MuiButton: {
+      styleOverrides: {
+        root: { borderRadius: 8, textTransform: "none", fontWeight: 600 },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: { borderRadius: 16, boxShadow: "0 8px 24px rgba(0,0,0,0.12)" },
+      },
+    },
   },
 });
 
@@ -45,18 +61,45 @@ const DEFAULT_NUM_POINTS = 3;
 // Componente para representar un segmento visual
 const SegmentVisual = ({ segments, letters, total }) => (
   <Fade in timeout={800}>
-    <Box sx={{ mt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <Box
+      sx={{
+        mt: 4,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
       <Typography variant="h6" color="primary" gutterBottom>
         Representación Visual
       </Typography>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", py: 2, overflowX: "auto" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 2,
+          overflowX: "auto",
+        }}
+      >
         {segments.map((segment, index) => (
           <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
-            <Chip label={letters[index]} color="primary" sx={{ height: 40, width: 40, borderRadius: "50%", fontWeight: "bold" }} />
+            <Chip
+              label={letters[index]}
+              color="primary"
+              sx={{
+                height: 40,
+                width: 40,
+                borderRadius: "50%",
+                fontWeight: "bold",
+              }}
+            />
             <Box
               sx={{
                 height: 8,
-                bgcolor: typeof segment === "string" ? "secondary.main" : "primary.main",
+                bgcolor:
+                  typeof segment === "string"
+                    ? "secondary.main"
+                    : "primary.main",
                 width: typeof segment === "string" ? 120 : Number(segment) * 10,
                 minWidth: 40,
                 position: "relative",
@@ -67,12 +110,24 @@ const SegmentVisual = ({ segments, letters, total }) => (
                   left: "50%",
                   transform: "translateX(-50%)",
                   fontWeight: "bold",
-                  color: typeof segment === "string" ? "secondary.main" : "primary.main",
+                  color:
+                    typeof segment === "string"
+                      ? "secondary.main"
+                      : "primary.main",
                 },
               }}
             />
             {index === segments.length - 1 && (
-              <Chip label={letters[index + 1]} color="primary" sx={{ height: 40, width: 40, borderRadius: "50%", fontWeight: "bold" }} />
+              <Chip
+                label={letters[index + 1]}
+                color="primary"
+                sx={{
+                  height: 40,
+                  width: 40,
+                  borderRadius: "50%",
+                  fontWeight: "bold",
+                }}
+              />
             )}
           </Box>
         ))}
@@ -84,7 +139,13 @@ const SegmentVisual = ({ segments, letters, total }) => (
   </Fade>
 );
 
+// TabPanel
+function TabPanel({ children, value, index }) {
+  return value === index && <Box sx={{ p: 3 }}>{children}</Box>;
+}
+
 function GeometricSegmentsExercise() {
+  const [value, setValue] = useState(0);
   const [numPoints, setNumPoints] = useState(DEFAULT_NUM_POINTS);
   const [exercise, setExercise] = useState(null);
   const [userAnswer, setUserAnswer] = useState("");
@@ -147,13 +208,45 @@ function GeometricSegmentsExercise() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <Box sx={{ width: "100%" }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs value={value} onChange={(e, newValue) => setValue(newValue)}>
+            <Tab label="Item One" />
+            <Tab label="Item Two" />
+            <Tab label="Item Three" />
+          </Tabs>
+        </Box>
+        <TabPanel value={value} index={0}>
+          Item One
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          Item Two
+        </TabPanel>
+        <TabPanel value={value} index={2}>
+          Item Three
+        </TabPanel>
+      </Box>
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography variant="h1" align="center" gutterBottom className="gradient-text">
+        <Typography
+          variant="h1"
+          align="center"
+          gutterBottom
+          className="gradient-text"
+        >
           Ejercicios de Segmentos Geométricos
         </Typography>
 
         <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 3,
+              flexWrap: "wrap",
+              gap: 2,
+            }}
+          >
             <FormControl sx={{ minWidth: 200 }}>
               <InputLabel id="points-label">Número de puntos</InputLabel>
               <Select
@@ -170,7 +263,13 @@ function GeometricSegmentsExercise() {
               </Select>
             </FormControl>
 
-            <Button variant="contained" color="primary" startIcon={<RefreshOutlined />} onClick={generateExercise} size="large">
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<RefreshOutlined />}
+              onClick={generateExercise}
+              size="large"
+            >
               Nuevo Ejercicio
             </Button>
 
@@ -200,8 +299,12 @@ function GeometricSegmentsExercise() {
                       variant="body1"
                       sx={{
                         mb: 1,
-                        fontWeight: typeof segment === "string" ? "bold" : "normal",
-                        color: typeof segment === "string" ? "secondary.main" : "inherit",
+                        fontWeight:
+                          typeof segment === "string" ? "bold" : "normal",
+                        color:
+                          typeof segment === "string"
+                            ? "secondary.main"
+                            : "inherit",
                       }}
                     >
                       {exercise.letters[index]}
@@ -209,11 +312,28 @@ function GeometricSegmentsExercise() {
                     </Typography>
                   ))}
                 </Box>
-                <Typography variant="body1" paragraph sx={{ fontWeight: "medium" }}>
-                  Si se sabe que el total del segmento {exercise.letters.join("")} es {exercise.total}, ¿cuánto vale X?
+                <Typography
+                  variant="body1"
+                  paragraph
+                  sx={{ fontWeight: "medium" }}
+                >
+                  Si se sabe que el total del segmento{" "}
+                  {exercise.letters.join("")} es {exercise.total}, ¿cuánto vale
+                  X?
                 </Typography>
-                <SegmentVisual segments={exercise.segments} letters={exercise.letters} total={exercise.total} />
-                <Box sx={{ mt: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <SegmentVisual
+                  segments={exercise.segments}
+                  letters={exercise.letters}
+                  total={exercise.total}
+                />
+                <Box
+                  sx={{
+                    mt: 4,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   <TextField
                     label="Valor de X"
                     type="number"
