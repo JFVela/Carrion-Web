@@ -25,15 +25,23 @@ const getGradeColor = (grade) => {
 };
 
 export default function InfoResumen({ student }) {
-  const topPercentage = Math.round((student.meritRank / student.totalStudents) * 100);
+  const topPercentage = Math.round(
+    (student.meritRank / student.totalStudents) * 100
+  );
 
   return (
     <SummaryContainer elevation={0}>
       <InstitutionName variant="h4">{student.institution}</InstitutionName>
-      <AcademicYear variant="subtitle1">Año Académico {student.academicYear}</AcademicYear>
+      <AcademicYear variant="subtitle1">
+        Año Académico {student.academicYear}
+      </AcademicYear>
 
       <Box sx={{ mb: 4, textAlign: "center" }}>
-        <StudentAvatar src={student.photoUrl} alt={student.studentName} sx={{ width: 100, height: 100 }} />
+        <StudentAvatar
+          src={student.photoUrl}
+          alt={student.studentName}
+          sx={{ width: 100, height: 100 }}
+        />
         <StudentName variant="h5">{student.studentName}</StudentName>
         <StudentId variant="body2">{student.studentId}</StudentId>
       </Box>
@@ -43,27 +51,37 @@ export default function InfoResumen({ student }) {
       </Typography>
 
       <Grid container spacing={0} sx={{ gap: "15px", flexWrap: "wrap" }}>
-        <Grid item xs={12} sm={5.9}>
+        <Grid size={{ xs: 12, sm: 5.8 }}>
           <InfoCard>
             <CardContent>
-              <InfoLabel><SchoolIcon /> Grado</InfoLabel>
+              <InfoLabel>
+                <SchoolIcon /> Grado
+              </InfoLabel>
               <InfoValue>{student.grade}</InfoValue>
-              <InfoLabel sx={{ mt: 3 }}><ClassIcon /> Sección</InfoLabel>
+              <InfoLabel sx={{ mt: 3 }}>
+                <ClassIcon /> Sección
+              </InfoLabel>
               <InfoValue>{student.section}</InfoValue>
             </CardContent>
           </InfoCard>
         </Grid>
 
-        <Grid item xs={12} sm={5.9}>
+        <Grid size={{ xs: 12, sm: 5.9 }}>
           <InfoCard>
             <CardContent>
-              <InfoLabel><EmojiEventsIcon /> Orden de Mérito</InfoLabel>
-              <InfoValue>{student.meritRank} de {student.totalStudents}</InfoValue>
+              <InfoLabel>
+                <EmojiEventsIcon /> Orden de Mérito
+              </InfoLabel>
+              <InfoValue>
+                {student.meritRank} de {student.totalStudents}
+              </InfoValue>
               <Box sx={{ pl: 3.5 }}>
                 <MeritChip label={`Top ${topPercentage}%`} size="small" />
               </Box>
 
-              <InfoLabel sx={{ mt: 3 }}><GroupIcon /> Promedio General</InfoLabel>
+              <InfoLabel sx={{ mt: 3 }}>
+                <GroupIcon /> Promedio General
+              </InfoLabel>
               <InfoValue sx={{ color: getGradeColor(student.averageGrade) }}>
                 {student.averageGrade}
               </InfoValue>

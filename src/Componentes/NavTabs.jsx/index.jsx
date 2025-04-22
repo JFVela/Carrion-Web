@@ -10,6 +10,8 @@ function NavTabs({ tabs, currentValue, onChange }) {
         width: "100%",
         margin: "0 auto",
         px: { xs: 1, sm: 2 },
+        display: "flex",
+        justifyContent: "space-evenly",
       }}
     >
       <TabList
