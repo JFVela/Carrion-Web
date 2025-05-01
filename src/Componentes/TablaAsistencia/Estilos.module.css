@@ -1,0 +1,159 @@
+.tablaAsistenciaContenedor {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.barraBusqueda {
+  margin-bottom: 15px;
+}
+
+.campoBusqueda {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.campoBusqueda:focus {
+  border-color: #8e44ad;
+}
+
+.tablaContenedor {
+  overflow-x: auto;
+}
+
+.tablaAsistencia {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+}
+
+.tablaAsistencia th,
+.tablaAsistencia td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.tablaAsistencia th {
+  background-color: #8e44ad;
+  color: white;
+  font-weight: 600;
+}
+
+.tablaAsistencia tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.tablaAsistencia tr:hover {
+  background-color: #f1f1f1;
+}
+
+.celdaBotones {
+  display: flex;
+  gap: 5px;
+}
+
+.botonAsistencia {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ddd;
+  background-color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.botonAsistencia:hover {
+  background-color: #f0f0f0;
+}
+
+.botonAsistencia.puntual {
+  background-color: #2ecc71; /* Verde */
+  color: white;
+  border-color: #2ecc71;
+}
+
+.botonAsistencia.tarde {
+  background-color: #f39c12; /* Naranja */
+  color: white;
+  border-color: #f39c12;
+}
+
+.botonAsistencia.ausente {
+  background-color: #e74c3c; /* Rojizo */
+  color: white;
+  border-color: #e74c3c;
+}
+
+
+.campoObservacion {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.contenedorBotonGuardar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.botonGuardar {
+  background-color: #8e44ad;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.botonGuardar:hover {
+  background-color: #7d3c98;
+}
+
+@media (max-width: 768px) {
+  .celdaBotones {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .botonAsistencia {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .tablaAsistencia th,
+  .tablaAsistencia td {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tablaAsistencia {
+    font-size: 12px;
+  }
+
+  .botonAsistencia {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .campoObservacion {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
