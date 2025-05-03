@@ -36,17 +36,23 @@ function ModalFormulario({ alumno, columnas, onGuardar, onCerrar }) {
       <div className={Estilos.modalContenido}>
         <h2>{alumno ? "Editar Alumno" : "Agregar Alumno"}</h2>
         <form onSubmit={handleSubmit}>
-          {columnas.map((columna) => (
-            <div key={columna} className={Estilos.campoFormulario}>
-              <label htmlFor={columna}>{columna}:</label>
-              <input
-                name={columna}
-                value={formData[columna]}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          ))}
+          {columnas.map(
+            (
+              columna,
+              index // Agregar "index" como segundo parámetro en el map()
+            ) =>
+              index !== 0 && ( // Condición para ocultar el primer elemento
+                <div key={columna} className={Estilos.campoFormulario}>
+                  <label htmlFor={columna}>{columna}:</label>
+                  <input
+                    name={columna}
+                    value={formData[columna]}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              )
+          )}
           <div className={Estilos.botonesFormulario}>
             <button type="submit" className={Estilos.botonGuardar}>
               Guardar

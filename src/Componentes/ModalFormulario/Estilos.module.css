@@ -75,3 +75,7 @@
 .botonCancelar:hover {
   background-color: #da190b;
 }
+
+.oculto {
+  display: none;
+}
