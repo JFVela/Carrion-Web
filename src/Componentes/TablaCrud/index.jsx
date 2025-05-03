@@ -1,7 +1,7 @@
 import React from "react";
 import Estilos from "./Estilos.module.css";
 
-function TablaAlumnos({ alumnos, onEditar, onEliminar }) {
+function TablaCrud({ alumnos, onEditar, onEliminar }) {
   // Si no hay alumnos, mostrar mensaje
   if (alumnos.length === 0) {
     return <p>No hay alumnos para mostrar.</p>;
@@ -12,7 +12,7 @@ function TablaAlumnos({ alumnos, onEditar, onEliminar }) {
 
   return (
     <div className={Estilos.tablaContenedor}>
-      <table className={Estilos.tablaAlumnos}>
+      <table className={Estilos.tablaCrud}>
         <thead>
           <tr>
             {columnas.map((columna) => (
@@ -53,4 +53,4 @@ function TablaAlumnos({ alumnos, onEditar, onEliminar }) {
   );
 }
 
-export default TablaAlumnos;
+export default TablaCrud;

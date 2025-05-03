@@ -123,14 +123,48 @@ function ListaAlumnos() {
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
     }).then((result) => {
-      if (result.isConfirmed) {
-        setAlumnos(alumnos.filter((alumno) => alumno.id !== id));
-        Swal.fire(
-          "¡Eliminado!",
-          "El alumno ha sido eliminado correctamente",
-          "success"
-        );
-      }
+      if (!result.isConfirmed) return;
+
+      // Función para llamar al endpoint con opcional force
+      const callDelete = (force = false) => {
+        fetch("http://localhost:3000/Admin/crudAlumnos/eliminarAlumno.php", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, force }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.mensaje) {
+              Swal.fire("¡Eliminado!", data.mensaje, "success");
+              setAlumnos((prev) => prev.filter((a) => a.id !== id));
+            } else if (data.code === 1451) {
+              // FK constraint: preguntar si fuerza
+              Swal.fire({
+                title: "¿Forzar eliminación?",
+                text:
+                  data.error +
+                  " ¿Deseas forzar y eliminar todas las referencias?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, forzar",
+                cancelButtonText: "No, cancelar",
+              }).then((sec) => {
+                if (sec.isConfirmed) {
+                  callDelete(true);
+                }
+              });
+            } else {
+              Swal.fire("Error", data.error || "No se pudo eliminar", "error");
+            }
+          })
+          .catch((error) => {
+            console.error("Error al eliminar el alumno:", error);
+            Swal.fire("Error", "No se pudo conectar con el servidor", "error");
+          });
+      };
+
+      // Primera llamada sin forzar
+      callDelete(false);
     });
   };
 

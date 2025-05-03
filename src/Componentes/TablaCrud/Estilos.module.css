@@ -3,26 +3,26 @@
   overflow-x: auto;
 }
 
-.tablaAlumnos {
+.tablaCrud {
   width: 100%;
   border-collapse: collapse;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   background-color: white;
 }
 
-.tablaAlumnos th,
-.tablaAlumnos td {
+.tablaCrud th,
+.tablaCrud td {
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
 
-.tablaAlumnos th {
+.tablaCrud th {
   background-color: #f2f2f2;
   font-weight: bold;
 }
 
-.tablaAlumnos tr:hover {
+.tablaCrud tr:hover {
   background-color: #f9f9f9;
 }
 
