@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TablaAlumnos from "../../../Componentes/TablaAlumnos";
+import TablaCrud from "../../../Componentes/TablaCrud";
 import ModalFormulario from "../../../Componentes/ModalFormulario";
 import Swal from "sweetalert2";
 import Estilos from "./Estilos.module.css";
@@ -13,13 +13,15 @@ function ListaAlumnos() {
       apellido: "Pérez",
       edad: 20,
       promedio: 8.5,
-      idioma: "español",
+      sEXO: "español",
     },
     { id: 2, nombre: "María", apellido: "González", edad: 22, promedio: 9.2 },
     { id: 3, nombre: "Carlos", apellido: "Rodríguez", edad: 21, promedio: 7.8 },
     { id: 4, nombre: "Ana", apellido: "López", edad: 23, promedio: 8.9 },
     { id: 5, nombre: "Pedro", apellido: "Martínez", edad: 20, promedio: 7.5 },
   ]);
+
+  const columnas = Object.keys(alumnos[0]);
 
   // Estado para el filtro de búsqueda
   const [filtro, setFiltro] = useState("");
@@ -123,7 +125,7 @@ function ListaAlumnos() {
         </button>
       </div>
 
-      <TablaAlumnos
+      <TablaCrud
         alumnos={alumnosFiltrados}
         onEditar={abrirModalEditar}
         onEliminar={eliminarAlumno}
@@ -132,6 +134,7 @@ function ListaAlumnos() {
       {modalAbierto && (
         <ModalFormulario
           alumno={alumnoSeleccionado}
+          columnas={columnas} // Ahora el formulario es dinámico
           onGuardar={guardarAlumno}
           onCerrar={cerrarModal}
         />
