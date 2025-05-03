@@ -11,6 +11,10 @@ import Error404 from "./Pages/Error404";
 import PaginaProfe from "./Pages/Profesor/Inicio";
 import TomarAsistencia from "./Pages/Profesor/TomarAsistencia";
 
+//Paginas de administración
+import PaginaAdmin from "./Pages/Admin/Inicio";
+import ListaAlumnos from "./Pages/Admin/ListaAlumnos";
+
 function AppRoutes() {
   return (
     <Routes>
@@ -28,6 +32,11 @@ function AppRoutes() {
       <Route path="/profesor" element={<PaginaProfe />}>
         <Route path="tomar-asistencia" element={<TomarAsistencia />} />
       </Route>
+
+      <Route path="/admin" element={<PaginaAdmin />}>
+        <Route path="lista-alumnos" element={<ListaAlumnos />} />
+      </Route>
+
     </Routes>
   );
 }
