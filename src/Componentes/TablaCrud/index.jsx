@@ -20,7 +20,8 @@ function TablaAlumnos({ alumnos, onEditar, onEliminar }) {
                 {columna.charAt(0).toUpperCase() + columna.slice(1)}
               </th>
             ))}
-            <th>Acciones</th>
+            {/* Aquí: */}
+            <th key="acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -29,7 +30,8 @@ function TablaAlumnos({ alumnos, onEditar, onEliminar }) {
               {columnas.map((columna) => (
                 <td key={`${alumno.id}-${columna}`}>{alumno[columna]}</td>
               ))}
-              <td className={Estilos.acciones}>
+              {/* Y aquí: */}
+              <td key={`acciones-${alumno.id}`} className={Estilos.acciones}>
                 <button
                   onClick={() => onEditar(alumno)}
                   className={Estilos.botonEditar}

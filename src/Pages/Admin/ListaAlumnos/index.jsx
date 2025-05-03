@@ -13,7 +13,7 @@ function ListaAlumnos() {
 
   // Al montar el componente, obtenemos los datos del backend PHP
   useEffect(() => {
-    fetch("http://localhost:3000/listarAlumnos.php")
+    fetch("http://localhost:3000/Admin/crudAlumnos/listarAlumnos.php")
       .then((response) => response.json())
       .then((data) => setAlumnos(data))
       .catch((error) => {
@@ -39,7 +39,11 @@ function ListaAlumnos() {
 
   // Función para abrir el modal de agregar
   const abrirModalAgregar = () => {
-    setAlumnoSeleccionado(null);
+    const nuevoAlumno = { id: 0 }; // Solo id por defecto
+    columnas.forEach((col) => {
+      if (col !== "id") nuevoAlumno[col] = "";
+    });
+    setAlumnoSeleccionado(nuevoAlumno);
     setModalAbierto(true);
   };
 
@@ -57,29 +61,53 @@ function ListaAlumnos() {
 
   // Función para guardar un alumno (agregar o editar)
   const guardarAlumno = (alumno) => {
-    if (alumno.id) {
-      // Editar alumno existente
-      setAlumnos(alumnos.map((a) => (a.id === alumno.id ? alumno : a)));
-      Swal.fire({
-        title: "¡Actualizado!",
-        text: "El alumno ha sido actualizado correctamente",
-        icon: "success",
-        confirmButtonText: "Ok",
+    console.log(JSON.stringify(alumno));
+    const metodo =
+      alumno.id && alumno.id !== "0" && alumno.id !== 0 ? "PUT" : "POST";
+    const url = alumno.id
+      ? `http://localhost:3000/Admin/crudAlumnos/editarAlumnos.php`
+      : `http://localhost:3000/Admin/crudAlumnos/agregarAlumnos.php`;
+
+    fetch(url, {
+      method: metodo,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(alumno),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.mensaje) {
+          Swal.fire({
+            title: "¡Éxito!",
+            text: data.mensaje,
+            icon: "success",
+            confirmButtonText: "Ok",
+          });
+
+          // Actualizar lista de alumnos después de agregar
+          fetch("http://localhost:3000/Admin/crudAlumnos/listarAlumnos.php")
+            .then((response) => response.json())
+            .then((data) => setAlumnos(data));
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: data.error || "No se pudo procesar la solicitud",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error en la solicitud:", error);
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo conectar con el servidor",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
       });
-    } else {
-      // Agregar nuevo alumno
-      const nuevoAlumno = {
-        ...alumno,
-        id: alumnos.length > 0 ? Math.max(...alumnos.map((a) => a.id)) + 1 : 1,
-      };
-      setAlumnos([...alumnos, nuevoAlumno]);
-      Swal.fire({
-        title: "¡Agregado!",
-        text: "El alumno ha sido agregado correctamente",
-        icon: "success",
-        confirmButtonText: "Ok",
-      });
-    }
+
     cerrarModal();
   };
 
