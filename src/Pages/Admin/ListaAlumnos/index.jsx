@@ -1,36 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TablaCrud from "../../../Componentes/TablaCrud";
 import ModalFormulario from "../../../Componentes/ModalFormulario";
 import Swal from "sweetalert2";
 import Estilos from "./Estilos.module.css";
 
 function ListaAlumnos() {
-  // Estado para almacenar los datos de los alumnos
-  const [alumnos, setAlumnos] = useState([
-    {
-      id: 1,
-      nombre: "Juan",
-      apellido: "Pérez",
-      edad: 20,
-      promedio: 8.5,
-      sEXO: "español",
-    },
-    { id: 2, nombre: "María", apellido: "González", edad: 22, promedio: 9.2 },
-    { id: 3, nombre: "Carlos", apellido: "Rodríguez", edad: 21, promedio: 7.8 },
-    { id: 4, nombre: "Ana", apellido: "López", edad: 23, promedio: 8.9 },
-    { id: 5, nombre: "Pedro", apellido: "Martínez", edad: 20, promedio: 7.5 },
-  ]);
-
-  const columnas = Object.keys(alumnos[0]);
-
-  // Estado para el filtro de búsqueda
+  // Estado para almacenar los datos de los alumnos (inicialmente vacío)
+  const [alumnos, setAlumnos] = useState([]);
   const [filtro, setFiltro] = useState("");
-
-  // Estado para el modal
   const [modalAbierto, setModalAbierto] = useState(false);
-
-  // Estado para el alumno seleccionado (para editar)
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(null);
+
+  // Al montar el componente, obtenemos los datos del backend PHP
+  useEffect(() => {
+    fetch("http://localhost:3000/listarAlumnos.php")
+      .then((response) => response.json())
+      .then((data) => setAlumnos(data))
+      .catch((error) => {
+        console.error("Error al obtener los alumnos:", error);
+        Swal.fire({
+          title: "Error",
+          text: "No se pudieron cargar los datos de los alumnos",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+      });
+  }, []);
+
+  // Verificamos que existan datos para calcular las columnas dinamicamente
+  const columnas = alumnos.length > 0 ? Object.keys(alumnos[0]) : [];
 
   // Función para filtrar alumnos
   const alumnosFiltrados = alumnos.filter((alumno) =>
