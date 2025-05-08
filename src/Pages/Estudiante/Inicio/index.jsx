@@ -1,7 +1,7 @@
-import CartitasResumen from "../../Componentes/CartitasResumen";
-import { Contenido } from "../../Componentes/estilos";
-import GraficoBarra from "../../Componentes/GraficoBarra";
-import MensajeProfesor from "../../Componentes/MensajeProfesor";
+import CartitasResumen from "../../../Componentes/CartitasResumen";
+import { Contenido } from "../../../Componentes/estilos";
+import GraficoBarra from "../../../Componentes/GraficoBarra";
+import MensajeProfesor from "../../../Componentes/MensajeProfesor";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Inicio = () => {

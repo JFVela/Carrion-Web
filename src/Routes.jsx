@@ -1,10 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import PaginaBase from "./Pages/PaginaBase";
-import Inicio from "./Pages/Inicio";
-import Cursos from "./Pages/Cursos";
-import Asistencias from "./Pages/Asistencias";
-import Trucos from "./Pages/Trucos";
-import Ejercicios from "./Pages/Ejercicios";
+import PaginaBase from "./Pages/Estudiante/PaginaBase";
+import Inicio from "./Pages/Estudiante/Inicio";
+import Cursos from "./Pages/Estudiante/Cursos";
+import Asistencias from "./Pages/Estudiante/Asistencias";
+import Trucos from "./Pages/Estudiante/Trucos";
+import Ejercicios from "./Pages/Estudiante/Ejercicios";
 import Error404 from "./Pages/Error404";
 
 // Páginas del profesor

@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { TabContext } from "@mui/lab";
 import { useState, useEffect } from "react";
-import Navegador from "../../Componentes/NavTabs.jsx";
+import Navegador from "../../../Componentes/NavTabs.jsx";
 
 import {
   Dashboard as DashboardIcon,

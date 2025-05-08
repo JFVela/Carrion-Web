@@ -1,7 +1,7 @@
-import ResumenAlumno from "../../Componentes/ResumenAlumno";
-import CursoAccordion from "../../Componentes/CursoAccordion.jsx";
+import ResumenAlumno from "../../../Componentes/ResumenAlumno";
+import CursoAccordion from "../../../Componentes/CursoAccordion.jsx";
 import { Box } from "@mui/material";
-import { NombreProfesor, NotasTexto, NotasDivider } from "../../Componentes/estilos";
+import { NombreProfesor, NotasTexto, NotasDivider } from "../../../Componentes/estilos";
 
 // Datos de prueba
 const studentData = {
