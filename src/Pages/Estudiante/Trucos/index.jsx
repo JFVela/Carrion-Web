@@ -1,514 +1,459 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
-  Container,
-  Typography,
-  Box,
   Paper,
   TextField,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  Typography,
+  Box,
+  InputAdornment,
+  ThemeProvider,
+  createTheme,
   Grid,
   Card,
   CardContent,
   CardActions,
-  Slider,
-  Divider,
-  IconButton,
-  Fade,
-  Grow,
-  useTheme,
+  CardMedia,
   useMediaQuery,
-  InputAdornment,
 } from "@mui/material";
 import {
-  Refresh as RefreshIcon,
-  Check as CheckIcon,
-  Timeline as TimelineIcon,
-  AccessTime as AccessTimeIcon,
-  RotateRight as RotateRightIcon,
-  ArrowUpward as ArrowUpwardIcon,
-  ArrowDownward as ArrowDownwardIcon,
-  SettingsBackupRestore as ResetIcon,
+  Search as SearchIcon,
+  PlayArrow as PlayArrowIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 
-// Componente para configurar ejercicios
-const ConfiguracionEjercicios = ({
-  numEjercicios,
-  setNumEjercicios,
-  generarEjercicios,
-}) => (
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: { xs: "column", sm: "row" },
-      alignItems: "center",
-      justifyContent: "space-between",
-      mb: 4,
-      gap: 2,
-      p: 2,
-      borderRadius: 2,
-      backgroundColor: "rgba(99, 102, 241, 0.05)",
-      border: "1px solid rgba(99, 102, 241, 0.1)",
-    }}
-  >
-    <Box sx={{ width: "100%", maxWidth: { xs: "100%", sm: "60%" } }}>
-      <Typography variant="body1" gutterBottom>
-        Cantidad de ejercicios: {numEjercicios}
-      </Typography>
-      <Slider
-        value={numEjercicios}
-        onChange={(e, newValue) => setNumEjercicios(newValue)}
-        min={1}
-        max={20}
-        marks={[
-          { value: 1, label: "1" },
-          { value: 5, label: "5" },
-          { value: 10, label: "10" },
-          { value: 20, label: "20" },
-        ]}
-        valueLabelDisplay="auto"
-        sx={{
-          color: "#6366F1",
-          "& .MuiSlider-thumb:hover, & .MuiSlider-thumb.Mui-focusVisible": {
-            boxShadow: "0 0 0 8px rgba(99, 102, 241, 0.16)",
+const COURSE_COLORS = ["#7c4dff", "#9c27b0", "#673ab7"];
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#7c4dff",
+      light: "#b47cff",
+      dark: "#3f1dcb",
+      contrastText: "#ffffff",
+    },
+    secondary: {
+      main: "#9c27b0",
+      light: "#d05ce3",
+      dark: "#6a0080",
+      contrastText: "#ffffff",
+    },
+    background: { default: "#f5f5f5", paper: "#ffffff" },
+  },
+  typography: {
+    fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
+    h4: { fontWeight: 600 },
+    h6: { fontWeight: 600 },
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          transition: "transform 0.2s, box-shadow 0.2s",
+          "&:hover": {
+            transform: "translateY(-4px)",
+            boxShadow: "0 12px 20px rgba(124,77,255,0.15)",
           },
-        }}
-      />
-    </Box>
-    <Button
-      variant="contained"
-      startIcon={<RefreshIcon />}
-      onClick={generarEjercicios}
-      sx={{
-        background: "linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%)",
-        borderRadius: 2,
-        px: 3,
-        py: 1,
-        fontWeight: 600,
-        textTransform: "none",
-        boxShadow: "0 4px 10px rgba(99, 102, 241, 0.3)",
-        "&:hover": { boxShadow: "0 6px 15px rgba(99, 102, 241, 0.4)" },
-      }}
-    >
-      Generar Ejercicios
-    </Button>
-  </Box>
-);
-
-// Componente para mostrar el resumen de puntuación
-const PuntuacionResumen = ({ puntuacion }) => (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      mb: 4,
-      opacity: puntuacion.verificados > 0 ? 1 : 0,
-      transition: "opacity 0.3s ease-in-out",
-    }}
-  >
-    <Paper
-      elevation={2}
-      sx={{
-        p: 2,
-        borderRadius: 2,
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
-        backgroundColor: "rgba(99, 102, 241, 0.08)",
-        border: "1px solid rgba(99, 102, 241, 0.2)",
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <CheckIcon sx={{ color: "#10B981", mr: 0.5 }} />
-        <Typography variant="body1">
-          <strong>{puntuacion.correctos}</strong> correctos
-        </Typography>
-      </Box>
-      <Divider orientation="vertical" flexItem />
-      <Typography variant="body1">
-        <strong>{puntuacion.verificados}</strong> de{" "}
-        <strong>{puntuacion.total}</strong> completados
-      </Typography>
-    </Paper>
-  </Box>
-);
-
-// Componente para renderizar cada ejercicio
-const EjercicioCard = ({
-  ejercicio,
-  respuesta,
-  resultado,
-  handleRespuestaChange,
-  verificar,
-  resetearEjercicio,
-  animate,
-}) => (
-  <Grow
-    in={animate}
-    timeout={(ejercicio.id + 1) * 200}
-    style={{ transformOrigin: "0 0 0" }}
-  >
-    <Card
-      elevation={2}
-      sx={{
-        borderRadius: 2,
-        overflow: "visible",
-        position: "relative",
-        transition: "all 0.3s ease-in-out",
-        border: resultado?.verificado
-          ? resultado.correcto
-            ? "1px solid rgba(16, 185, 129, 0.5)"
-            : "1px solid rgba(239, 68, 68, 0.5)"
-          : "1px solid transparent",
-        "&:hover": { boxShadow: "0 8px 25px rgba(0, 0, 0, 0.1)" },
-      }}
-    >
-      <Box
-        sx={{
-          position: "absolute",
-          top: -15,
-          right: 20,
-          backgroundColor: "white",
-          borderRadius: "15px",
-          px: 2,
-          py: 0.5,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-          border: "1px solid rgba(99, 102, 241, 0.2)",
-        }}
-      >
-        {ejercicio.iconoTipo}
-        <Typography variant="caption" fontWeight={600} color="#6366F1">
-          {ejercicio.tipoTexto}
-        </Typography>
-      </Box>
-
-      <CardContent>
-        <Typography
-          variant="h6"
-          gutterBottom
-          sx={{ fontWeight: 600, color: "#4B5563" }}
-        >
-          Ejercicio {ejercicio.id + 1}
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <AccessTimeIcon sx={{ color: "#6366F1", mr: 1 }} />
-          <Typography
-            variant="body1"
-            dangerouslySetInnerHTML={{ __html: ejercicio.enunciado }}
-          />
-        </Box>
-
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          {["g", "m", "s"].map((campo) => (
-            <Grid item xs={12} sm={4} key={campo}>
-              <TextField
-                label={
-                  campo === "g"
-                    ? "Grados"
-                    : campo === "m"
-                    ? "Minutos"
-                    : "Segundos"
-                }
-                type="number"
-                value={respuesta[campo] || ""}
-                onChange={(e) =>
-                  handleRespuestaChange(
-                    ejercicio.id,
-                    campo,
-                    e.target.value || 0
-                  )
-                }
-                fullWidth
-                InputProps={{
-                  placeholder: "0",
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {campo === "g" ? "°" : campo === "m" ? "'" : '"'}
-                    </InputAdornment>
-                  ),
-                }}
-                variant="outlined"
-                size="small"
-              />
-            </Grid>
-          ))}
-        </Grid>
-
-        {resultado?.verificado && (
-          <Fade in={true}>
-            <Box
-              sx={{
-                mt: 2,
-                p: 2,
-                borderRadius: 2,
-                backgroundColor: resultado.correcto
-                  ? "rgba(16, 185, 129, 0.1)"
-                  : "rgba(239, 68, 68, 0.1)",
-                border: resultado.correcto
-                  ? "1px solid rgba(16, 185, 129, 0.3)"
-                  : "1px solid rgba(239, 68, 68, 0.3)",
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              {resultado.correcto ? (
-                <>
-                  <CheckIcon sx={{ color: "#10B981" }} />
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "#10B981", fontWeight: 600 }}
-                  >
-                    ¡Correcto! {resultado.respuestaCorrecta.g}°{" "}
-                    {resultado.respuestaCorrecta.m}'{" "}
-                    {resultado.respuestaCorrecta.s}"
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <RotateRightIcon sx={{ color: "#EF4444" }} />
-                  <Typography variant="body2" sx={{ color: "#EF4444" }}>
-                    Incorrecto. La respuesta correcta es{" "}
-                    {resultado.respuestaCorrecta.g}°{" "}
-                    {resultado.respuestaCorrecta.m}'{" "}
-                    {resultado.respuestaCorrecta.s}"
-                  </Typography>
-                </>
-              )}
-            </Box>
-          </Fade>
-        )}
-      </CardContent>
-
-      <CardActions sx={{ px: 2, pb: 2, pt: 0 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<CheckIcon />}
-          onClick={() => verificar(ejercicio.id)}
-          disabled={resultado?.verificado}
-          sx={{
-            background: resultado?.verificado
-              ? "rgba(99, 102, 241, 0.5)"
-              : "linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%)",
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-            boxShadow: resultado?.verificado
-              ? "none"
-              : "0 4px 10px rgba(99, 102, 241, 0.3)",
-          }}
-        >
-          Verificar
-        </Button>
-        <IconButton
-          size="small"
-          onClick={() => resetearEjercicio(ejercicio.id)}
-          sx={{ ml: 1 }}
-        >
-          <ResetIcon />
-        </IconButton>
-      </CardActions>
-    </Card>
-  </Grow>
-);
-
-// Componente principal
-function ConversionSexagesimal() {
-  const [numEjercicios, setNumEjercicios] = useState(5);
-  const [ejercicios, setEjercicios] = useState([]);
-  const [respuestas, setRespuestas] = useState({});
-  const [resultados, setResultados] = useState({});
-  const [animateCards, setAnimateCards] = useState(false);
-
-  useEffect(() => {
-    generarEjercicios();
-  }, []);
-
-  const generarEjercicios = () => {
-    setAnimateCards(false);
-    setTimeout(() => {
-      const nuevosEjercicios = [];
-      const nuevasRespuestas = {};
-      for (let i = 0; i < numEjercicios; i++) {
-        const ejercicio = generarUno(i);
-        nuevosEjercicios.push(ejercicio);
-        nuevasRespuestas[i] = { g: 0, m: 0, s: 0 };
-      }
-      setEjercicios(nuevosEjercicios);
-      setRespuestas(nuevasRespuestas);
-      setResultados({});
-      setAnimateCards(true);
-    }, 300);
-  };
-
-  const generarUno = (id) => {
-    const tipos = ["g-m", "m-s", "s-g"];
-    const tipo = tipos[Math.floor(Math.random() * tipos.length)];
-    const data = {
-      "g-m": {
-        enunciado: (g) => `Convertir ${g}° a minutos.`,
-        resp: (g) => ({ g: 0, m: g * 60, s: 0 }),
-        icono: <ArrowDownwardIcon />,
-        texto: "Grados a Minutos",
-      },
-      "m-s": {
-        enunciado: (m) => `Convertir ${m}' a segundos.`,
-        resp: (m) => ({ g: 0, m: 0, s: m * 60 }),
-        icono: <ArrowDownwardIcon />,
-        texto: "Minutos a Segundos",
-      },
-      "s-g": {
-        enunciado: (s0) => `Convertir ${s0}" a grados, minutos y segundos.`,
-        resp: (s0) => {
-          const g = Math.floor(s0 / 3600);
-          const resto = s0 % 3600;
-          const m = Math.floor(resto / 60);
-          const s = resto % 60;
-          return { g, m, s };
         },
-        icono: <ArrowUpwardIcon />,
-        texto: "Segundos a GMS",
       },
-    };
-    const valor = Math.floor(Math.random() * 90) + 1;
-    return {
-      id,
-      enunciado: data[tipo].enunciado(valor),
-      resp: data[tipo].resp(valor),
-      tipo,
-      tipoTexto: data[tipo].texto,
-      iconoTipo: data[tipo].icono,
-    };
-  };
-
-  const handleRespuestaChange = (id, campo, valor) => {
-    setRespuestas((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], [campo]: parseInt(valor) || 0 },
-    }));
-  };
-
-  const verificar = (id) => {
-    const ejercicio = ejercicios.find((e) => e.id === id);
-    const respuesta = respuestas[id];
-    const esCorrecta =
-      respuesta.g === ejercicio.resp.g &&
-      respuesta.m === ejercicio.resp.m &&
-      respuesta.s === ejercicio.resp.s;
-    setResultados((prev) => ({
-      ...prev,
-      [id]: {
-        verificado: true,
-        correcto: esCorrecta,
-        respuestaCorrecta: ejercicio.resp,
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: { borderRadius: 8, textTransform: "none", fontWeight: 500 },
       },
-    }));
-  };
+    },
+  },
+});
 
-  const resetearEjercicio = (id) => {
-    setRespuestas((prev) => ({ ...prev, [id]: { g: 0, m: 0, s: 0 } }));
-    setResultados((prev) => {
-      const newResults = { ...prev };
-      delete newResults[id];
-      return newResults;
-    });
-  };
+const MOCK_DATA = [
+  {
+    id: 1,
+    curso: "Geometría",
+    seccion: "Segmentos",
+    titulo: "Operemos juntos",
+    videoId: "iVrhFVtG9IE",
+  },
+  {
+    id: 2,
+    curso: "Álgebra",
+    seccion: "Ecuaciones",
+    titulo: "Ecuaciones de primer grado",
+    videoId: "j6nXscNccr4",
+  },
+  {
+    id: 3,
+    curso: "Trigonometría",
+    seccion: "Funciones",
+    titulo: "Funciones trigonométricas",
+    videoId: "I_izvAbhExY",
+  },
+  {
+    id: 4,
+    curso: "Geometría",
+    seccion: "Segmentos",
+    titulo: "Operemos juntos",
+    videoId: "oRdxUFDoQe0",
+  },
+  {
+    id: 5,
+    curso: "Álgebra",
+    seccion: "Ecuaciones",
+    titulo: "Ecuaciones de primer grado",
+    videoId: "5mfDzBeeBSI",
+  },
+  {
+    id: 6,
+    curso: "Trigonometría",
+    seccion: "Funciones",
+    titulo: "Funciones trigonométricas",
+    videoId: "55dzY6Xc4OQ",
+  },
+  {
+    id: 7,
+    curso: "Geometría",
+    seccion: "Segmentos",
+    titulo: "Operemos juntos",
+    videoId: "2KuWjZD6PBA",
+  },
+  {
+    id: 8,
+    curso: "Álgebra",
+    seccion: "Ecuaciones",
+    titulo: "Ecuaciones de primer grado",
+    videoId: "yM6-QVxIXTs",
+  },
+  {
+    id: 9,
+    curso: "Trigonometría",
+    seccion: "Funciones",
+    titulo: "Funciones trigonométricas",
+    videoId: "NvIfbZhvZm4",
+  },
+];
 
-  const calcularPuntuacion = () => {
-    const ejerciciosVerificados = Object.values(resultados).filter(
-      (r) => r.verificado
-    );
-    const ejerciciosCorrectos = ejerciciosVerificados.filter((r) => r.correcto);
-    return {
-      total: ejercicios.length,
-      verificados: ejerciciosVerificados.length,
-      correctos: ejerciciosCorrectos.length,
-    };
-  };
+const getCourseColor = (courseName) => {
+  const courseIndex = MOCK_DATA.findIndex((item) => item.curso === courseName);
+  return COURSE_COLORS[courseIndex % COURSE_COLORS.length];
+};
 
-  const puntuacion = calcularPuntuacion();
+const VideoCard = ({ item, onVideoClick }) => {
+  const courseColor = getCourseColor(item.curso);
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(to bottom, #f5f7fa, #e4e8f0)",
-        py: 4,
-      }}
-    >
-      <Container maxWidth="md">
-        <Paper
-          elevation={3}
-          sx={{
-            p: { xs: 2, sm: 4 },
-            borderRadius: 3,
-            background: "rgba(255, 255, 255, 0.9)",
-            backdropFilter: "blur(10px)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-            mb: 4,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              mb: 3,
-              flexDirection: { xs: "column", sm: "row" },
-            }}
-          >
-            <TimelineIcon
-              sx={{
-                fontSize: 40,
-                mr: { xs: 0, sm: 2 },
-                mb: { xs: 1, sm: 0 },
-                color: "#6366F1",
-              }}
-            />
+    <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Card
+        elevation={3}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          overflow: "hidden",
+          height: "100%",
+          width: "100%",
+          transition: "transform 0.3s, box-shadow 0.3s",
+          "&:hover": {
+            transform: "translateY(-8px)",
+            boxShadow: (theme) => `0 12px 20px ${theme.palette.primary.main}33`,
+          },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "6px",
+            background: courseColor,
+            borderTopLeftRadius: 2,
+            borderTopRightRadius: 2,
+          },
+        }}
+      >
+        <CardContent sx={{ pt: 3, pb: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
             <Typography
-              variant="h4"
-              component="h1"
+              variant="subtitle1"
+              sx={{ color: courseColor, fontWeight: 600 }}
+            >
+              {item.curso}
+            </Typography>
+            <Typography
+              variant="body2"
               sx={{
-                fontWeight: 700,
-                background: "linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                textAlign: { xs: "center", sm: "left" },
+                bgcolor: `${courseColor}15`,
+                color: courseColor,
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 2,
+                fontWeight: 500,
+                fontSize: "0.75rem",
               }}
             >
-              Práctica de Conversión Sexagesimal
+              {item.seccion}
             </Typography>
           </Box>
 
-          <ConfiguracionEjercicios
-            numEjercicios={numEjercicios}
-            setNumEjercicios={setNumEjercicios}
-            generarEjercicios={generarEjercicios}
+          <Typography
+            variant="h6"
+            sx={{
+              fontSize: { xs: "1rem", sm: "1.1rem", md: "1.25rem" },
+              lineHeight: 1.3,
+              fontWeight: 600,
+              mb: 2,
+              height: "2.6em",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {item.titulo}
+          </Typography>
+        </CardContent>
+
+        <CardMedia
+          component="img"
+          image={`https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg`}
+          alt={`Miniatura de ${item.titulo}`}
+          sx={{ width: "100%", aspectRatio: "16/9", objectFit: "cover" }}
+        />
+
+        <CardActions sx={{ p: 2 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            startIcon={<PlayArrowIcon />}
+            onClick={() => onVideoClick(item.videoId, item.titulo)}
+            sx={{
+              py: 1,
+              background: `linear-gradient(45deg, ${courseColor} 0%, ${courseColor}CC 100%)`,
+              boxShadow: `0 4px 8px ${courseColor}33`,
+              "&:hover": {
+                boxShadow: `0 6px 12px ${courseColor}66`,
+              },
+            }}
+          >
+            Ver video
+          </Button>
+        </CardActions>
+      </Card>
+    </Grid>
+  );
+};
+
+export default function DataCardGrid() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState(MOCK_DATA);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTitle, setSelectedTitle] = useState("");
+
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      const lowercasedSearch = searchTerm.toLowerCase();
+      setFilteredData(
+        searchTerm
+          ? MOCK_DATA.filter(
+              (item) =>
+                item.curso.toLowerCase().includes(lowercasedSearch) ||
+                item.seccion.toLowerCase().includes(lowercasedSearch) ||
+                item.titulo.toLowerCase().includes(lowercasedSearch)
+            )
+          : MOCK_DATA
+      );
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const handleVideoClick = (videoId, title) => {
+    setSelectedVideo(videoId);
+    setSelectedTitle(title);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedVideo(null);
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: "1400px",
+          mx: "auto",
+          p: { xs: 2, sm: 3, md: 4 },
+          background:
+            "linear-gradient(135deg, rgba(124,77,255,0.05) 0%, rgba(156,39,176,0.05) 100%)",
+          minHeight: "100vh",
+          borderRadius: { xs: 0, sm: 2 },
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Box sx={{ mb: { xs: 3, sm: 4 } }}>
+          <Typography
+            variant="h4"
+            sx={{
+              mb: 3,
+              color: "primary.dark",
+              textAlign: "center",
+              position: "relative",
+              fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                bottom: -8,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: { xs: "60px", sm: "80px" },
+                height: "4px",
+                background: "linear-gradient(90deg, #7c4dff, #9c27b0)",
+                borderRadius: "2px",
+              },
+            }}
+          >
+            Biblioteca de Videos Educativos
+          </Typography>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Buscar por curso, sección o título..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+              sx: {
+                borderRadius: 2,
+                bgcolor: "white",
+                "&:hover": { boxShadow: "0 0 0 2px rgba(124,77,255,0.2)" },
+                "&.Mui-focused": {
+                  boxShadow: "0 0 0 2px rgba(124,77,255,0.3)",
+                },
+              },
+            }}
+            sx={{ mb: 3 }}
           />
+        </Box>
 
-          <PuntuacionResumen puntuacion={puntuacion} />
-
-          <Grid container spacing={3}>
-            {ejercicios.map((ejercicio) => (
-              <Grid item xs={12} key={ejercicio.id}>
-                <EjercicioCard
-                  ejercicio={ejercicio}
-                  respuesta={respuestas[ejercicio.id]}
-                  resultado={resultados[ejercicio.id]}
-                  handleRespuestaChange={handleRespuestaChange}
-                  verificar={verificar}
-                  resetearEjercicio={resetearEjercicio}
-                  animate={animateCards}
-                />
-              </Grid>
+        {filteredData.length > 0 ? (
+          <Grid container spacing={3} justifyContent="center">
+            {filteredData.map((item) => (
+              <VideoCard
+                key={item.id}
+                item={item}
+                onVideoClick={handleVideoClick}
+              />
             ))}
           </Grid>
-        </Paper>
-      </Container>
-    </Box>
+        ) : (
+          <Paper
+            elevation={2}
+            sx={{
+              p: 4,
+              textAlign: "center",
+              borderRadius: 3,
+              background: "rgba(255,255,255,0.8)",
+            }}
+          >
+            <Typography variant="body1" color="text.secondary">
+              No se encontraron resultados para "{searchTerm}"
+            </Typography>
+          </Paper>
+        )}
+
+        <Dialog
+          open={isModalOpen}
+          onClose={closeModal}
+          maxWidth="md"
+          fullWidth
+          fullScreen={isMobile}
+          PaperProps={{
+            sx: {
+              borderRadius: isMobile ? 0 : 3,
+              overflow: "hidden",
+              boxShadow: "0 12px 24px rgba(0,0,0,0.2)",
+              margin: isMobile ? 0 : 2,
+            },
+          }}
+        >
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              bgcolor: "primary.main",
+              color: "white",
+              py: 2,
+              px: { xs: 2, sm: 3 },
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                fontSize: { xs: "0.95rem", sm: "1.25rem" },
+                maxWidth: { xs: "80%", sm: "90%" },
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {selectedTitle}
+            </Typography>
+            <IconButton
+              edge="end"
+              color="inherit"
+              onClick={closeModal}
+              sx={{
+                bgcolor: "rgba(255,255,255,0.1)",
+                "&:hover": { bgcolor: "rgba(255,255,255,0.2)" },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ p: 0, bgcolor: "#000" }}>
+            {selectedVideo && (
+              <Box
+                sx={{
+                  position: "relative",
+                  paddingTop: "56.25%",
+                  width: "100%",
+                  bgcolor: "#000",
+                }}
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${selectedVideo}?rel=0&modestbranding=1`}
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    border: "none",
+                  }}
+                />
+              </Box>
+            )}
+          </DialogContent>
+        </Dialog>
+      </Box>
+    </ThemeProvider>
   );
 }
-
-export default ConversionSexagesimal;

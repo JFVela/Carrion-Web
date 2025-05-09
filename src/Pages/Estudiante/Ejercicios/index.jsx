@@ -1,372 +1,209 @@
-import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Typography,
-  Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
-  TextField,
-  Paper,
-  Divider,
-  Chip,
-  Fade,
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
-} from "@mui/material";
-import {
-  CalculateOutlined,
-  RefreshOutlined,
-  EmojiEvents,
-} from "@mui/icons-material";
-import Swal from "sweetalert2";
+"use client"
 
-// Importar tabs
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import { useState } from "react"
+import { Box, Container, Divider, Paper, Typography, useMediaQuery } from "@mui/material"
+import { MenuBook as MenuBookIcon } from "@mui/icons-material"
+import { createTheme, ThemeProvider } from "@mui/material/styles"
+
+import BarraNavegacion from "./Componentes/BarraNavegacion"
+import SelectorCursos from "./Componentes/SelectorCursos"
+import SelectorTemas from "./Componentes/SelectorTemas"
+import ContenidoTema from "./Componentes/ContenidoTema"
+import CabeceraSeccion from "./Componentes/CabeceraSeccion"
+
+// Datos de ejemplo
+const coursesData = [
+  {
+    id: 1,
+    name: "Matemáticas",
+    icon: "📐",
+    color: "#4caf50",
+    topics: [
+      {
+        id: 101,
+        name: "Álgebra",
+        exercises:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.",
+      },
+      {
+        id: 102,
+        name: "Geometría",
+        exercises:
+          "Praesent eget risus vitae massa semper aliquam quis mattis quam. Morbi vitae tortor tempus, placerat leo et, suscipit lectus. Phasellus ut euismod massa, eu eleifend ipsum. Nulla eu neque commodo, dapibus lectus nec, hendrerit magna. Praesent eget risus vitae massa semper aliquam quis mattis quam. Morbi vitae tortor tempus, placerat leo et, suscipit lectus. Phasellus ut euismod massa, eu eleifend ipsum.",
+      },
+      {
+        id: 103,
+        name: "Cálculo",
+        exercises:
+          "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec velit neque, auctor sit amet aliquam vel, ullamcorper sit amet ligula. Proin eget tortor risus. Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus. Vestibulum ac diam sit amet quam vehicula elementum sed sit amet dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae.",
+      },
+    ],
+  },
+  {
+    id: 2,
+    name: "Ciencias",
+    icon: "🧪",
+    color: "#2196f3",
+    topics: [
+      {
+        id: 201,
+        name: "Física",
+        exercises:
+          "Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem. Vivamus suscipit tortor eget felis porttitor volutpat. Nulla quis lorem ut libero malesuada feugiat. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem.",
+      },
+      {
+        id: 202,
+        name: "Química",
+        exercises:
+          "Donec rutrum congue leo eget malesuada. Donec sollicitudin molestie malesuada. Curabitur aliquet quam id dui posuere blandit. Vestibulum ac diam sit amet quam vehicula elementum sed sit amet dui. Donec rutrum congue leo eget malesuada. Donec sollicitudin molestie malesuada. Curabitur aliquet quam id dui posuere blandit.",
+      },
+      {
+        id: 203,
+        name: "Biología",
+        exercises:
+          "Pellentesque in ipsum id orci porta dapibus. Nulla quis lorem ut libero malesuada feugiat. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Sed porttitor lectus nibh. Pellentesque in ipsum id orci porta dapibus. Nulla quis lorem ut libero malesuada feugiat. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus.",
+      },
+    ],
+  },
+  {
+    id: 3,
+    name: "Historia",
+    icon: "🏛️",
+    color: "#ff9800",
+    topics: [
+      {
+        id: 301,
+        name: "Historia Antigua",
+        exercises:
+          "Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec velit neque, auctor sit amet aliquam vel, ullamcorper sit amet ligula. Nulla porttitor accumsan tincidunt. Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a.",
+      },
+      {
+        id: 302,
+        name: "Historia Moderna",
+        exercises:
+          "Cras ultricies ligula sed magna dictum porta. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Proin eget tortor risus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec velit neque, auctor sit amet aliquam vel, ullamcorper sit amet ligula.",
+      },
+      {
+        id: 303,
+        name: "Historia Contemporánea",
+        exercises:
+          "Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus. Cras ultricies ligula sed magna dictum porta. Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a. Curabitur aliquet quam id dui posuere blandit. Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus.",
+      },
+    ],
+  },
+  {
+    id: 4,
+    name: "Lenguaje",
+    icon: "📝",
+    color: "#e91e63",
+    topics: [
+      {
+        id: 401,
+        name: "Gramática",
+        exercises:
+          "Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Curabitur aliquet quam id dui posuere blandit. Vestibulum ac diam sit amet quam vehicula elementum sed sit amet dui. Donec sollicitudin molestie malesuada. Praesent sapien massa, convallis a pellentesque nec, egestas non nisi.",
+      },
+      {
+        id: 402,
+        name: "Literatura",
+        exercises:
+          "Nulla quis lorem ut libero malesuada feugiat. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem. Donec rutrum congue leo eget malesuada. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Nulla quis lorem ut libero malesuada feugiat.",
+      },
+      {
+        id: 403,
+        name: "Comprensión Lectora",
+        exercises:
+          "Sed porttitor lectus nibh. Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus. Nulla porttitor accumsan tincidunt. Pellentesque in ipsum id orci porta dapibus. Sed porttitor lectus nibh. Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus.",
+      },
+    ],
+  },
+]
 
 // Tema personalizado
 const theme = createTheme({
   palette: {
-    mode: "light",
-    primary: { main: "#6200ea" },
-    secondary: { main: "#00e676" },
-    background: { default: "#f5f5f5", paper: "#ffffff" },
+    primary: {
+      main: "#3f51b5",
+    },
+    secondary: {
+      main: "#f50057",
+    },
   },
   typography: {
-    fontFamily: "'Poppins', 'Roboto', 'Arial', sans-serif",
-    h1: { fontWeight: 700, fontSize: "2.5rem" },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: { borderRadius: 8, textTransform: "none", fontWeight: 600 },
-      },
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h4: {
+      fontWeight: 600,
     },
-    MuiPaper: {
-      styleOverrides: {
-        root: { borderRadius: 16, boxShadow: "0 8px 24px rgba(0,0,0,0.12)" },
-      },
+    h5: {
+      fontWeight: 500,
     },
   },
-});
+})
 
-// Constantes reutilizables
-const POINTS = ["A", "B", "C", "D", "E", "F"];
-const DEFAULT_NUM_POINTS = 3;
+function App() {
+  const [selectedCourse, setSelectedCourse] = useState(0)
+  const [selectedTopic, setSelectedTopic] = useState(0)
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
 
-// Componente para representar un segmento visual
-const SegmentVisual = ({ segments, letters, total }) => (
-  <Fade in timeout={800}>
-    <Box
-      sx={{
-        mt: 4,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <Typography variant="h6" color="primary" gutterBottom>
-        Representación Visual
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          py: 2,
-          overflowX: "auto",
-        }}
-      >
-        {segments.map((segment, index) => (
-          <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
-            <Chip
-              label={letters[index]}
-              color="primary"
-              sx={{
-                height: 40,
-                width: 40,
-                borderRadius: "50%",
-                fontWeight: "bold",
-              }}
-            />
-            <Box
-              sx={{
-                height: 8,
-                bgcolor:
-                  typeof segment === "string"
-                    ? "secondary.main"
-                    : "primary.main",
-                width: typeof segment === "string" ? 120 : Number(segment) * 10,
-                minWidth: 40,
-                position: "relative",
-                "&::after": {
-                  content: `"${segment}"`,
-                  position: "absolute",
-                  top: -25,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  fontWeight: "bold",
-                  color:
-                    typeof segment === "string"
-                      ? "secondary.main"
-                      : "primary.main",
-                },
-              }}
-            />
-            {index === segments.length - 1 && (
-              <Chip
-                label={letters[index + 1]}
-                color="primary"
-                sx={{
-                  height: 40,
-                  width: 40,
-                  borderRadius: "50%",
-                  fontWeight: "bold",
-                }}
-              />
-            )}
-          </Box>
-        ))}
-      </Box>
-      <Typography variant="body1" sx={{ mt: 1, fontWeight: "medium" }}>
-        Longitud total del segmento {letters.join("")}: {total} unidades
-      </Typography>
-    </Box>
-  </Fade>
-);
+  const handleCourseChange = (event, newValue) => {
+    setSelectedCourse(newValue)
+    setSelectedTopic(0) // Reset topic selection when changing course
+  }
 
-// TabPanel
-function TabPanel({ children, value, index }) {
-  return value === index && <Box sx={{ p: 3 }}>{children}</Box>;
-}
+  const handleTopicChange = (event, newValue) => {
+    setSelectedTopic(newValue)
+  }
 
-function GeometricSegmentsExercise() {
-  const [value, setValue] = useState(0);
-  const [numPoints, setNumPoints] = useState(DEFAULT_NUM_POINTS);
-  const [exercise, setExercise] = useState(null);
-  const [userAnswer, setUserAnswer] = useState("");
-  const [score, setScore] = useState(0);
-  const [attempts, setAttempts] = useState(0);
-
-  // Generar un nuevo ejercicio
-  const generateExercise = () => {
-    const letters = POINTS.slice(0, numPoints);
-    const segments = [];
-    const posX = Math.floor(Math.random() * (numPoints - 1));
-    const coefX = Math.floor(Math.random() * 5) + 2;
-    let total = 0;
-
-    for (let i = 0; i < numPoints - 1; i++) {
-      if (i === posX) {
-        segments.push(`${coefX}x`);
-        total += coefX;
-      } else {
-        const value = Math.floor(Math.random() * 10) + 2;
-        segments.push(value);
-        total += value;
-      }
-    }
-
-    const correctX = Math.floor(Math.random() * 6) + 2;
-    const adjustedTotal = total - coefX + coefX * correctX;
-
-    setExercise({ segments, letters, total: adjustedTotal, correctX });
-    setUserAnswer("");
-  };
-
-  // Verificar la respuesta del usuario
-  const checkAnswer = () => {
-    if (!exercise) return;
-
-    const userValue = Number(userAnswer);
-    const isCorrect = userValue === exercise.correctX;
-
-    setAttempts((prev) => prev + 1);
-
-    Swal.fire({
-      title: isCorrect ? "¡Correcto!" : "Incorrecto",
-      text: isCorrect
-        ? `X = ${exercise.correctX} es la respuesta correcta.`
-        : `La respuesta correcta era X = ${exercise.correctX}`,
-      icon: isCorrect ? "success" : "error",
-      confirmButtonText: "Siguiente ejercicio",
-      confirmButtonColor: theme.palette.primary.main,
-    }).then(() => {
-      if (isCorrect) setScore((prev) => prev + 1);
-      generateExercise();
-    });
-  };
-
-  useEffect(() => {
-    generateExercise();
-  }, []);
+  const currentCourse = coursesData[selectedCourse]
+  const currentTopic = currentCourse.topics[selectedTopic]
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ width: "100%" }}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={value} onChange={(e, newValue) => setValue(newValue)}>
-            <Tab label="Item One" />
-            <Tab label="Item Two" />
-            <Tab label="Item Three" />
-          </Tabs>
-        </Box>
-        <TabPanel value={value} index={0}>
-          Item One
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          Item Two
-        </TabPanel>
-        <TabPanel value={value} index={2}>
-          Item Three
-        </TabPanel>
-      </Box>
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography
-          variant="h1"
-          align="center"
-          gutterBottom
-          className="gradient-text"
-        >
-          Ejercicios de Segmentos Geométricos
-        </Typography>
+      <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "#f5f5f5" }}>
+        <BarraNavegacion />
 
-        <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 3,
-              flexWrap: "wrap",
-              gap: 2,
-            }}
-          >
-            <FormControl sx={{ minWidth: 200 }}>
-              <InputLabel id="points-label">Número de puntos</InputLabel>
-              <Select
-                labelId="points-label"
-                value={numPoints}
-                label="Número de puntos"
-                onChange={(e) => setNumPoints(Number(e.target.value))}
-              >
-                {[3, 4, 5, 6].map((value) => (
-                  <MenuItem key={value} value={value}>
-                    {value} puntos ({POINTS.slice(0, value).join("")})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<RefreshOutlined />}
-              onClick={generateExercise}
-              size="large"
-            >
-              Nuevo Ejercicio
-            </Button>
-
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <EmojiEvents color="primary" sx={{ mr: 1 }} />
-              <Typography variant="h6">
-                {score}/{attempts}
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+              <MenuBookIcon color="primary" sx={{ mr: 1 }} />
+              <Typography variant="h5" component="h1">
+                Selecciona un curso para practicar
               </Typography>
             </Box>
-          </Box>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              Elige un curso y tema para reforzar tu aprendizaje con ejercicios prácticos.
+            </Typography>
 
-          <Divider sx={{ my: 2 }} />
+            {/* Tabs de cursos */}
+            <SelectorCursos
+              coursesData={coursesData}
+              selectedCourse={selectedCourse}
+              handleCourseChange={handleCourseChange}
+              theme={theme}
+            />
 
-          {exercise && (
-            <Fade in timeout={500}>
-              <Box>
-                <Typography variant="h5" color="primary" gutterBottom>
-                  Problema:
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  El segmento {exercise.letters.join("")} está formado por:
-                </Typography>
-                <Box sx={{ pl: 2, mb: 2 }}>
-                  {exercise.segments.map((segment, index) => (
-                    <Typography
-                      key={index}
-                      variant="body1"
-                      sx={{
-                        mb: 1,
-                        fontWeight:
-                          typeof segment === "string" ? "bold" : "normal",
-                        color:
-                          typeof segment === "string"
-                            ? "secondary.main"
-                            : "inherit",
-                      }}
-                    >
-                      {exercise.letters[index]}
-                      {exercise.letters[index + 1]} = {segment}
-                    </Typography>
-                  ))}
-                </Box>
-                <Typography
-                  variant="body1"
-                  paragraph
-                  sx={{ fontWeight: "medium" }}
-                >
-                  Si se sabe que el total del segmento{" "}
-                  {exercise.letters.join("")} es {exercise.total}, ¿cuánto vale
-                  X?
-                </Typography>
-                <SegmentVisual
-                  segments={exercise.segments}
-                  letters={exercise.letters}
-                  total={exercise.total}
-                />
-                <Box
-                  sx={{
-                    mt: 4,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <TextField
-                    label="Valor de X"
-                    type="number"
-                    value={userAnswer}
-                    onChange={(e) => setUserAnswer(e.target.value)}
-                    variant="outlined"
-                    sx={{ mr: 2, width: "150px" }}
-                    onKeyPress={(e) => e.key === "Enter" && checkAnswer()}
-                  />
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    startIcon={<CalculateOutlined />}
-                    onClick={checkAnswer}
-                    size="large"
-                    disabled={!userAnswer}
-                  >
-                    Verificar
-                  </Button>
-                </Box>
-              </Box>
-            </Fade>
-          )}
-        </Paper>
+            <Divider sx={{ mb: 3 }} />
 
-        <Box sx={{ mt: 4, textAlign: "center" }}>
-          <Typography variant="body2" color="text.secondary">
-            Aprende geometría de forma divertida e interactiva
-          </Typography>
-        </Box>
-      </Container>
+            {/* Contenido del curso seleccionado */}
+            <Box sx={{ mb: 3 }}>
+              <CabeceraSeccion currentCourse={currentCourse} />
+
+              {/* Tabs de temas */}
+              <SelectorTemas
+                currentCourse={currentCourse}
+                selectedTopic={selectedTopic}
+                handleTopicChange={handleTopicChange}
+                theme={theme}
+              />
+
+              {/* Contenido del tema seleccionado */}
+              <ContenidoTema currentCourse={currentCourse} currentTopic={currentTopic} />
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
     </ThemeProvider>
-  );
+  )
 }
 
-export default GeometricSegmentsExercise;
+export default App
