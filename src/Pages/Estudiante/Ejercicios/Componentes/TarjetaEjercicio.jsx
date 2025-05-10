@@ -1,8 +1,7 @@
-"use client"
-
-import { lazy, Suspense } from "react"
-import { Button, Card, CardContent, Typography, Box, CircularProgress } from "@mui/material"
-import { ArrowForward as ArrowForwardIcon, Close as CloseIcon } from "@mui/icons-material"
+import { lazy, Suspense } from "react";
+import { Button, Card, CardContent, Typography, Box, CircularProgress } from "@mui/material";
+import { ArrowForward as ArrowForwardIcon, Close as CloseIcon } from "@mui/icons-material";
+import { rutasComponentes } from "../rutasComponentes"; // 👈 Importar el mapa de rutas
 
 export default function TarjetaEjercicio({
   titulo,
@@ -12,11 +11,11 @@ export default function TarjetaEjercicio({
   onSeleccionar,
   mostrarSoloContenido = false,
 }) {
+  // 🚀 Usar el mapa para importar dinámicamente el componente
   const ComponenteEjercicio = seleccionado
-    ? lazy(() => import(/* webpackChunkName: "[request]" */ `${rutaComponente}`))
-    : null
+    ? lazy(rutasComponentes[rutaComponente])
+    : null;
 
-  // Si solo queremos mostrar el contenido del ejercicio (para el área expandida)
   if (mostrarSoloContenido && seleccionado) {
     return (
       <Suspense
@@ -28,7 +27,7 @@ export default function TarjetaEjercicio({
       >
         <ComponenteEjercicio />
       </Suspense>
-    )
+    );
   }
 
   return (
@@ -87,5 +86,5 @@ export default function TarjetaEjercicio({
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }

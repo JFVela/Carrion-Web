@@ -2,23 +2,21 @@
   "Física": [
     {
       "id": "MRU",
-      "label": "MRU 6TO PRIMARIA",
-      "ruta": "../6to_Primaria/Física/MRU.jsx"
-    },     {
+      "label": "MRU 6TO PRIMARIA"
+    },
+    {
       "id": "MRUV",
-      "label": "MRUV 6TO PRIMARIA",
-      "ruta": "../6to_Primaria/Física/MRUV.jsx"
-    },    {
+      "label": "MRUV 6TO PRIMARIA"
+    },
+    {
       "id": "MVCL",
-      "label": "MVCL 6TO PRIMARIA",
-      "ruta": "../6to_Primaria/Física/MVCL.jsx"
+      "label": "MVCL 6TO PRIMARIA"
     }
   ],
   "Geometría": [
     {
       "id": "Segmentos",
-      "label": "SEGEMNTOS 6TO PRIMARIA",
-      "ruta": "../6to_Primaria/Geometria/Segmentos.jsx"
+      "label": "SEGMENTOS 6TO PRIMARIA"
     }
   ]
 }
