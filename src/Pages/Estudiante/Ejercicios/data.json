@@ -1,0 +1,36 @@
+{
+  "Física": [
+    {
+      "id": "MRU",
+      "label": "MRU 6TO PRIMARIA",
+      "ruta": "../6to_Primaria/Física/MRU.jsx"
+    }
+  ],
+  "Geometría": [
+    {
+      "id": "Segmentos",
+      "label": "SEGEMNTOS 6TO PRIMARIA",
+      "ruta": "../6to_Primaria/Geometria/Segmentos.jsx"
+    },
+    {
+      "id": "Ángulos",
+      "label": "Ángulos",
+      "ruta": "../6to_Primaria/Física/MRU.jsx"
+    },
+    {
+      "id": "Triángulos",
+      "label": "Triángulos",
+      "ruta": "../6to_Primaria/Física/MRU.jsx"
+    },
+    {
+      "id": "Círculos",
+      "label": "Círculos",
+      "ruta": "../6to_Primaria/Física/MRU.jsx"
+    },
+    {
+      "id": "Transformaciones",
+      "label": "Transformaciones",
+      "ruta": "../6to_Primaria/Física/MRU.jsx"
+    }
+  ]
+}
