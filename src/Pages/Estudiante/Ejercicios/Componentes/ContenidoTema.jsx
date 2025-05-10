@@ -1,21 +1,38 @@
-"use client"
-
-import { useState } from "react"
-import { Card, CardContent, CardHeader, Typography, Box, Grid, Collapse, Divider, Paper } from "@mui/material"
-import { Assignment as AssignmentIcon } from "@mui/icons-material"
-import TarjetaEjercicio from "./TarjetaEjercicio"
-import ejerciciosData from "../data.json"
+import { lazy, Suspense, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  Box,
+  Grid,
+  Collapse,
+  Divider,
+  Paper,
+} from "@mui/material";
+import { Assignment as AssignmentIcon } from "@mui/icons-material";
+import TarjetaEjercicio from "./TarjetaEjercicio";
+import ejerciciosData from "../data.json";
 
 export default function ContenidoTema({ currentCourse, currentTopic }) {
-  const listaEjercicios = ejerciciosData[currentTopic.name] || []
-  const [ejercicioSeleccionado, setEjercicioSeleccionado] = useState(null)
+  const listaEjercicios = ejerciciosData[currentTopic.name] || [];
+  const [ejercicioSeleccionado, setEjercicioSeleccionado] = useState(null);
+
+  const Pruebas = lazy(() => import("../6to_Primaria/Física/MRU.jsx"));
+  const [holi, setholi] = useState(null);
+
+  const handleClick = (component) => {
+    setholi(component);
+  };
 
   // Encontrar el ejercicio seleccionado
-  const ejercicioActivo = listaEjercicios.find((ej) => ej.id === ejercicioSeleccionado)
+  const ejercicioActivo = listaEjercicios.find(
+    (ej) => ej.id === ejercicioSeleccionado
+  );
 
   const handleSeleccionarEjercicio = (id) => {
-    setEjercicioSeleccionado(id === ejercicioSeleccionado ? null : id)
-  }
+    setEjercicioSeleccionado(id === ejercicioSeleccionado ? null : id);
+  };
 
   return (
     <Card elevation={2}>
@@ -23,7 +40,9 @@ export default function ContenidoTema({ currentCourse, currentTopic }) {
         title={
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <AssignmentIcon sx={{ mr: 1, color: currentCourse.color }} />
-            <Typography variant="h6">Ejercicios de {currentTopic.name}</Typography>
+            <Typography variant="h6">
+              Ejercicios de {currentTopic.name}
+            </Typography>
           </Box>
         }
         sx={{
@@ -67,7 +86,9 @@ export default function ContenidoTema({ currentCourse, currentTopic }) {
                   rutaComponente={ejercicioActivo.ruta}
                   color={currentCourse.color}
                   seleccionado={true}
-                  onSeleccionar={() => handleSeleccionarEjercicio(ejercicioActivo.id)}
+                  onSeleccionar={() =>
+                    handleSeleccionarEjercicio(ejercicioActivo.id)
+                  }
                   mostrarSoloContenido={true}
                 />
               </Box>
@@ -97,6 +118,20 @@ export default function ContenidoTema({ currentCourse, currentTopic }) {
           ))}
         </Grid>
       </CardContent>
+      <div>
+        <h1>Página de Repaso</h1>
+        <div>
+          <button onClick={() => handleClick("prueba")}>
+            Cargar pruba
+          </button>
+
+        </div>
+
+        {/* Aquí se carga el componente dinámicamente */}
+        <Suspense fallback={<div>Cargando...</div>}>
+          {holi === "prueba" && <Pruebas />}
+        </Suspense>
+      </div>
     </Card>
-  )
+  );
 }
