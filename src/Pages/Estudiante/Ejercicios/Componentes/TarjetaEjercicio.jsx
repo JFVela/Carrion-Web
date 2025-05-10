@@ -11,6 +11,7 @@ import {
   ArrowForward as ArrowForwardIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
+import { routesMap } from "./routesMap";
 
 export default function TarjetaEjercicio({
   titulo,
@@ -20,11 +21,8 @@ export default function TarjetaEjercicio({
   onSeleccionar,
   mostrarSoloContenido = false,
 }) {
-  // 🚀 Usar el mapa para importar dinámicamente el componente
-  const ComponenteEjercicio = seleccionado
-    ? lazy(() =>
-        import(/* webpackChunkName: "[request]" */ `${rutaComponente}`)
-      )
+  const ComponenteEjercicio = seleccionado && routesMap[rutaComponente]
+    ? lazy(routesMap[rutaComponente])
     : null;
 
   if (mostrarSoloContenido && seleccionado) {

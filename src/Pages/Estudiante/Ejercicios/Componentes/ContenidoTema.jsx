@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -17,13 +17,6 @@ import ejerciciosData from "../data.json";
 export default function ContenidoTema({ currentCourse, currentTopic }) {
   const listaEjercicios = ejerciciosData[currentTopic.name] || [];
   const [ejercicioSeleccionado, setEjercicioSeleccionado] = useState(null);
-
-  const Pruebas = lazy(() => import("../6to_Primaria/Física/MRU.jsx"));
-  const [holi, setholi] = useState(null);
-
-  const handleClick = (component) => {
-    setholi(component);
-  };
 
   // Encontrar el ejercicio seleccionado
   const ejercicioActivo = listaEjercicios.find(
@@ -118,20 +111,6 @@ export default function ContenidoTema({ currentCourse, currentTopic }) {
           ))}
         </Grid>
       </CardContent>
-      <div>
-        <h1>Página de Repaso</h1>
-        <div>
-          <button onClick={() => handleClick("prueba")}>
-            Cargar pruba
-          </button>
-
-        </div>
-
-        {/* Aquí se carga el componente dinámicamente */}
-        <Suspense fallback={<div>Cargando...</div>}>
-          {holi === "prueba" && <Pruebas />}
-        </Suspense>
-      </div>
     </Card>
   );
 }
