@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { API_ENDPOINTS } from '../../api/endpoints.js'
 const Login = () => {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -9,9 +9,8 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:9999/Auth.php', {
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: 'POST',
-         mode: 'cors',
         headers: {
           'Content-Type': 'application/json'
         },

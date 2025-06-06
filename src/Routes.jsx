@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import PaginaBase from "./Pages/Estudiante/PaginaBase";
 import Inicio from "./Pages/Estudiante/Inicio";
+import Login from "./Pages/Login/";
 import Cursos from "./Pages/Estudiante/Cursos";
 import Asistencias from "./Pages/Estudiante/Asistencias";
 import Trucos from "./Pages/Estudiante/Trucos";
@@ -21,6 +22,7 @@ function AppRoutes() {
       {/* Rutas del alumno */}
       <Route path="/" element={<PaginaBase />}>
         <Route index element={<Inicio />} />
+        <Route path="login" element={< Login/>} />
         <Route path="cursos" element={<Cursos />} />
         <Route path="asistencias" element={<Asistencias />} />
         <Route path="trucos" element={<Trucos />} />
