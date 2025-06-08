@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from '../../api/endpoints.js'
 import { jwtDecode } from 'jwt-decode';
+
+
 const Login = () => {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState(null);
-
+ const navigate = useNavigate();
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -44,6 +48,7 @@ const Login = () => {
 
         console.log('Autenticación exitosa');
         // Aquí puedes redirigir o cambiar de vista
+        navigate('/');
       } else {
         setError(data.error || 'Error en la autenticación');
       }
@@ -52,6 +57,10 @@ const Login = () => {
       setError('No se pudo conectar al servidor');
     }
   };
+
+
+
+//vista
 
   return (
     <form onSubmit={handleSubmit}>
