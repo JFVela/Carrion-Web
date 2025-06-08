@@ -37,6 +37,9 @@ const tabs = [
   },
 ];
 
+
+
+
 function PaginaBase() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -44,10 +47,26 @@ function PaginaBase() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [mounted, setMounted] = useState(false);
 
+
+useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setMounted(true);
+
+      navigate('login');
+    } else {
+      setMounted(true);
+    }
+  }, [navigate]);
+
+
+
+  /*
+
   useEffect(() => {
     setMounted(true);
   }, []);
-
+*/
   const getTabValue = () =>
     tabs.find((tab) => tab.path === location.pathname)?.value || false;
 
