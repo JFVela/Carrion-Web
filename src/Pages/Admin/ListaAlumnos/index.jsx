@@ -1,206 +1,148 @@
-import { useState, useEffect } from "react";
-import TablaCrud from "../../../Componentes/TablaCrud";
-import ModalFormulario from "../../../Componentes/ModalFormulario";
-import Swal from "sweetalert2";
-import Estilos from "./Estilos.module.css";
+import { useState, useEffect } from "react"
+import { Container, Typography, Box, Paper } from "@mui/material"
+import { PeopleAlt } from "@mui/icons-material"
+import TablaAlumnos from "./Componentes/TablaAlumnos"
+import BarraHerramientas from "./Componentes/BarraHerramientas"
+import ModalAlumno from "./Componentes/ModalAlumno"
+import { alumnosIniciales } from "./alumnos"
+import "./Estilos/page.css"
 
-function ListaAlumnos() {
-  // Estado para almacenar los datos de los alumnos (inicialmente vacío)
-  const [alumnos, setAlumnos] = useState([]);
-  const [filtro, setFiltro] = useState("");
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(null);
+export default function CrudAlumnos() {
+  // Estados principales
+  const [alumnos, setAlumnos] = useState([])
+  const [alumnosFiltrados, setAlumnosFiltrados] = useState([])
+  const [busqueda, setBusqueda] = useState("")
+  const [modalAbierto, setModalAbierto] = useState(false)
+  const [alumnoEditando, setAlumnoEditando] = useState(null)
+  const [ordenamiento, setOrdenamiento] = useState({
+    campo: "id",
+    direccion: "asc",
+  })
 
-  // Al montar el componente, obtenemos los datos del backend PHP
+  // Inicializar datos
   useEffect(() => {
-    fetch("http://localhost:3000/Admin/crudAlumnos/listarAlumnos.php")
-      .then((response) => response.json())
-      .then((data) => setAlumnos(data))
-      .catch((error) => {
-        console.error("Error al obtener los alumnos:", error);
-        Swal.fire({
-          title: "Error",
-          text: "No se pudieron cargar los datos de los alumnos",
-          icon: "error",
-          confirmButtonText: "Ok",
-        });
-      });
-  }, []);
+    setAlumnos(alumnosIniciales)
+    setAlumnosFiltrados(alumnosIniciales)
+  }, [])
 
-  // Verificamos que existan datos para calcular las columnas dinamicamente
-  const columnas = alumnos.length > 0 ? Object.keys(alumnos[0]) : [];
+  // Función de búsqueda dinámica
+  useEffect(() => {
+    if (!busqueda.trim()) {
+      setAlumnosFiltrados(alumnos)
+    } else {
+      const filtrados = alumnos.filter((alumno) =>
+        Object.values(alumno).some((valor) => valor.toLowerCase().includes(busqueda.toLowerCase())),
+      )
+      setAlumnosFiltrados(filtrados)
+    }
+  }, [busqueda, alumnos])
 
-  // Función para filtrar alumnos
-  const alumnosFiltrados = alumnos.filter((alumno) =>
-    Object.values(alumno).some((valor) =>
-      String(valor).toLowerCase().includes(filtro.toLowerCase())
-    )
-  );
+  // Función de ordenamiento
+  const ordenarPor = (campo) => {
+    const nuevaDireccion = ordenamiento.campo === campo && ordenamiento.direccion === "asc" ? "desc" : "asc"
+    setOrdenamiento({ campo, direccion: nuevaDireccion })
 
-  // Función para abrir el modal de agregar
-  const abrirModalAgregar = () => {
-    const nuevoAlumno = { id: 0 }; // Solo id por defecto
-    columnas.forEach((col) => {
-      if (col !== "id") nuevoAlumno[col] = "";
-    });
-    setAlumnoSeleccionado(nuevoAlumno);
-    setModalAbierto(true);
-  };
+    const alumnosOrdenados = [...alumnosFiltrados].sort((a, b) => {
+      const valorA = a[campo].toLowerCase()
+      const valorB = b[campo].toLowerCase()
 
-  // Función para abrir el modal de editar
-  const abrirModalEditar = (alumno) => {
-    setAlumnoSeleccionado(alumno);
-    setModalAbierto(true);
-  };
-
-  // Función para cerrar el modal
-  const cerrarModal = () => {
-    setModalAbierto(false);
-    setAlumnoSeleccionado(null);
-  };
-
-  // Función para guardar un alumno (agregar o editar)
-  const guardarAlumno = (alumno) => {
-    console.log(JSON.stringify(alumno));
-    const metodo =
-      alumno.id && alumno.id !== "0" && alumno.id !== 0 ? "PUT" : "POST";
-    const url = alumno.id
-      ? `http://localhost:3000/Admin/crudAlumnos/editarAlumnos.php`
-      : `http://localhost:3000/Admin/crudAlumnos/agregarAlumnos.php`;
-
-    fetch(url, {
-      method: metodo,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(alumno),
+      if (nuevaDireccion === "asc") {
+        return valorA < valorB ? -1 : valorA > valorB ? 1 : 0
+      } else {
+        return valorA > valorB ? -1 : valorA < valorB ? 1 : 0
+      }
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.mensaje) {
-          Swal.fire({
-            title: "¡Éxito!",
-            text: data.mensaje,
-            icon: "success",
-            confirmButtonText: "Ok",
-          });
 
-          // Actualizar lista de alumnos después de agregar
-          fetch("http://localhost:3000/Admin/crudAlumnos/listarAlumnos.php")
-            .then((response) => response.json())
-            .then((data) => setAlumnos(data));
-        } else {
-          Swal.fire({
-            title: "Error",
-            text: data.error || "No se pudo procesar la solicitud",
-            icon: "error",
-            confirmButtonText: "Ok",
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Error en la solicitud:", error);
-        Swal.fire({
-          title: "Error",
-          text: "No se pudo conectar con el servidor",
-          icon: "error",
-          confirmButtonText: "Ok",
-        });
-      });
+    setAlumnosFiltrados(alumnosOrdenados)
+  }
 
-    cerrarModal();
-  };
+  // Abrir modal para agregar alumno
+  const abrirModalAgregar = () => {
+    setAlumnoEditando(null)
+    setModalAbierto(true)
+  }
 
-  // Función para eliminar un alumno
-  const eliminarAlumno = (id) => {
-    Swal.fire({
-      title: "¿Estás seguro?",
-      text: "Esta acción no se puede revertir",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (!result.isConfirmed) return;
+  // Abrir modal para editar alumno
+  const abrirModalEditar = (alumno) => {
+    setAlumnoEditando(alumno)
+    setModalAbierto(true)
+  }
 
-      // Función para llamar al endpoint con opcional force
-      const callDelete = (force = false) => {
-        fetch("http://localhost:3000/Admin/crudAlumnos/eliminarAlumno.php", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, force }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.mensaje) {
-              Swal.fire("¡Eliminado!", data.mensaje, "success");
-              setAlumnos((prev) => prev.filter((a) => a.id !== id));
-            } else if (data.code === 1451) {
-              // FK constraint: preguntar si fuerza
-              Swal.fire({
-                title: "¿Forzar eliminación?",
-                text:
-                  data.error +
-                  " ¿Deseas forzar y eliminar todas las referencias?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Sí, forzar",
-                cancelButtonText: "No, cancelar",
-              }).then((sec) => {
-                if (sec.isConfirmed) {
-                  callDelete(true);
-                }
-              });
-            } else {
-              Swal.fire("Error", data.error || "No se pudo eliminar", "error");
-            }
-          })
-          .catch((error) => {
-            console.error("Error al eliminar el alumno:", error);
-            Swal.fire("Error", "No se pudo conectar con el servidor", "error");
-          });
-      };
+  // Guardar alumno (agregar o editar)
+  const guardarAlumno = (datosAlumno) => {
+    if (alumnoEditando) {
+      // Editar alumno existente
+      setAlumnos((prev) =>
+        prev.map((alumno) => (alumno.id === alumnoEditando.id ? { ...datosAlumno, id: alumnoEditando.id } : alumno)),
+      )
+    } else {
+      // Agregar nuevo alumno
+      const nuevoAlumno = {
+        ...datosAlumno,
+        id: (alumnos.length + 1).toString(),
+      }
+      setAlumnos((prev) => [...prev, nuevoAlumno])
+    }
 
-      // Primera llamada sin forzar
-      callDelete(false);
-    });
-  };
+    setModalAbierto(false)
+    setAlumnoEditando(null)
+  }
 
   return (
-    <div className={Estilos.contenedor}>
-      <h1>Gestión de Alumnos</h1>
+    <div className="crud-container">
+      <Container maxWidth="lg">
+        {/* Header */}
+        <Box className="header-container">
+          <Box className="header-icon">
+            <PeopleAlt fontSize="large" />
+          </Box>
+          <Box>
+            <Typography variant="h4" component="h1" className="header-title">
+              Gestión de Alumnos
+            </Typography>
+            <Typography variant="body1" color="textSecondary">
+              Administra la información de los estudiantes
+            </Typography>
+          </Box>
+        </Box>
 
-      <div className={Estilos.controles}>
-        <input
-          type="text"
-          placeholder="Buscar alumno..."
-          value={filtro}
-          onChange={(e) => setFiltro(e.target.value)}
-          className={Estilos.buscador}
-        />
-        <button onClick={abrirModalAgregar} className={Estilos.botonAgregar}>
-          Agregar Alumno
-        </button>
-      </div>
+        {/* Barra de herramientas */}
+        <Paper elevation={3} className="toolbar-paper">
+          <BarraHerramientas
+            busqueda={busqueda}
+            setBusqueda={setBusqueda}
+            abrirModalAgregar={abrirModalAgregar}
+            totalAlumnos={alumnos.length}
+            alumnosFiltrados={alumnosFiltrados.length}
+            mostrarFiltrados={busqueda.length > 0}
+          />
+        </Paper>
 
-      <TablaCrud
-        alumnos={alumnosFiltrados}
-        onEditar={abrirModalEditar}
-        onEliminar={eliminarAlumno}
-      />
+        {/* Tabla de alumnos */}
+        <Paper elevation={3} className="table-paper">
+          <TablaAlumnos
+            alumnos={alumnosFiltrados}
+            ordenamiento={ordenamiento}
+            ordenarPor={ordenarPor}
+            abrirModalEditar={abrirModalEditar}
+          />
+        </Paper>
 
-      {modalAbierto && (
-        <ModalFormulario
-          alumno={alumnoSeleccionado}
-          columnas={columnas} // Ahora el formulario es dinámico
+        {/* Modal para agregar/editar alumno */}
+        <ModalAlumno
+          open={modalAbierto}
+          onClose={() => setModalAbierto(false)}
+          alumno={alumnoEditando}
           onGuardar={guardarAlumno}
-          onCerrar={cerrarModal}
         />
-      )}
-    </div>
-  );
-}
 
-export default ListaAlumnos;
+        {/* Footer */}
+        <Box className="footer">
+          <Typography variant="body2" color="textSecondary">
+            Sistema de Gestión de Alumnos - Desarrollado con ❤️
+          </Typography>
+        </Box>
+      </Container>
+    </div>
+  )
+}
