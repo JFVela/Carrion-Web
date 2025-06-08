@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../../api/endpoints.js'
+import { jwtDecode } from 'jwt-decode';
 const Login = () => {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -20,14 +21,26 @@ const Login = () => {
         })
       });
 
+
+
+
       const data = await response.json();
 
       if (response.ok && data.token) {
         // Guarda el token y datos del usuario
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
-        localStorage.setItem('rol', JSON.stringify(data.rol));
+      localStorage.setItem('token', data.token);
 
+      // Decodifica el token para extraer datos
+      const decoded = jwtDecode(data.token);
+      console.log(decoded);
+      
+      // Guarda los datos extraídos en localStorage si quieres
+      localStorage.setItem('usuario', JSON.stringify({
+        nombre: decoded.data.nombre,
+        apellido1: decoded.data.apellido1,
+        apellido2: decoded.data.apellido2
+      }));
+      localStorage.setItem('rol', decoded.data.rol);
 
         console.log('Autenticación exitosa');
         // Aquí puedes redirigir o cambiar de vista
