@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
 import { Container, Typography, Box, Paper } from "@mui/material"
-import { PeopleAlt } from "@mui/icons-material"
+import { Api, PeopleAlt } from "@mui/icons-material"
 import TablaAlumnos from "./Componentes/TablaAlumnos"
 import BarraHerramientas from "./Componentes/BarraHerramientas"
 import ModalAlumno from "./Componentes/ModalAlumno"
 import { alumnosIniciales } from "./alumnos"
+import { API_ENDPOINTS } from '../../../api/endpoints.js'
 import "./Estilos/page.css"
 
 export default function CrudAlumnos() {
@@ -20,10 +21,24 @@ export default function CrudAlumnos() {
   })
 
   // Inicializar datos
-  useEffect(() => {
-    setAlumnos(alumnosIniciales)
-    setAlumnosFiltrados(alumnosIniciales)
-  }, [])
+useEffect(() => {
+  const obtenerAlumnos = async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.GET_USERS);
+      if (!response.ok) throw new Error("Error en la respuesta del servidor");
+
+      const data = await response.json();
+      console.log(data);
+      
+      setAlumnos(data);
+      setAlumnosFiltrados(data);
+    } catch (error) {
+      console.error("Error al obtener los alumnos:", error);
+    }
+  };
+
+  obtenerAlumnos();
+}, []);
 
   // Función de búsqueda dinámica
   useEffect(() => {
@@ -67,7 +82,7 @@ export default function CrudAlumnos() {
     setAlumnoEditando(alumno)
     setModalAbierto(true)
   }
-
+/**EDITAR HACER UN PATCH*/
   // Guardar alumno (agregar o editar)
   const guardarAlumno = (datosAlumno) => {
     if (alumnoEditando) {
