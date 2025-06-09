@@ -48,7 +48,24 @@ const Login = () => {
 
         console.log('Autenticación exitosa');
         // Aquí puedes redirigir o cambiar de vista
-        navigate('/');
+        const rol= localStorage.getItem('rol');
+console.log(rol);
+
+        if(rol=='Admin'){
+ navigate('/admin');
+        }else if(rol=='Profesor'){
+ navigate('/profesor');
+        }else if(rol=='Alumno'){
+ navigate('/');
+        }else{
+          localStorage.clear();
+           navigate('/login');
+           
+        }
+
+
+
+       
       } else {
         setError(data.error || 'Error en la autenticación');
       }

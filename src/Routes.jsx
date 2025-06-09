@@ -36,7 +36,7 @@ function AppRoutes() {
       </Route>
 
       <Route path="/admin" element={<PaginaAdmin />}>
-        <Route path="lista-alumnos" element={<ListaAlumnos />} />
+        <Route path="gestion-alumnos" element={<ListaAlumnos />} />
       </Route>
 
     </Routes>
