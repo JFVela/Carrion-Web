@@ -60,7 +60,7 @@ export default function TablaAlumnos({ alumnos, ordenamiento, ordenarPor, abrirM
     } else if (columna.key === "id") {
       return (
         <Typography variant="body2" className="id-text">
-          #{alumno[columna.key]}
+          {alumno[columna.key]}
         </Typography>
       )
     } else {

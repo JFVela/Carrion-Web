@@ -7,9 +7,12 @@ import ModalAlumno from "./Componentes/ModalAlumno"
 import { alumnosIniciales } from "./alumnos"
 import { API_ENDPOINTS } from '../../../api/endpoints.js'
 import "./Estilos/page.css"
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function CrudAlumnos() {
   // Estados principales
+  const navigate = useNavigate();
+
   const [alumnos, setAlumnos] = useState([])
   const [alumnosFiltrados, setAlumnosFiltrados] = useState([])
   const [busqueda, setBusqueda] = useState("")
@@ -21,24 +24,40 @@ export default function CrudAlumnos() {
   })
 
   // Inicializar datos
-useEffect(() => {
-  const obtenerAlumnos = async () => {
-    try {
-      const response = await fetch(API_ENDPOINTS.GET_USERS);
-      if (!response.ok) throw new Error("Error en la respuesta del servidor");
+  useEffect(() => {
+    const obtenerAlumnos = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const response = await fetch(API_ENDPOINTS.GET_USERS, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.log(response);
+            
+            // Token inválido o expirado
+            localStorage.clear();
+            navigate('/login')
+          }
+          throw new Error("Error en la respuesta del servidor");
+        }
 
-      const data = await response.json();
-      console.log(data);
-      
-      setAlumnos(data);
-      setAlumnosFiltrados(data);
-    } catch (error) {
-      console.error("Error al obtener los alumnos:", error);
-    }
-  };
+        const data = await response.json();
+        console.log(data);
 
-  obtenerAlumnos();
-}, []);
+        setAlumnos(data);
+        setAlumnosFiltrados(data);
+      } catch (error) {
+        console.error("Error al obtener los alumnos:", error);
+      }
+    };
+
+    obtenerAlumnos();
+  }, []);
 
   // Función de búsqueda dinámica
   useEffect(() => {
@@ -82,7 +101,7 @@ useEffect(() => {
     setAlumnoEditando(alumno)
     setModalAbierto(true)
   }
-/**EDITAR HACER UN PATCH*/
+  /**EDITAR HACER UN PATCH*/
   // Guardar alumno (agregar o editar)
   const guardarAlumno = (datosAlumno) => {
     if (alumnoEditando) {
