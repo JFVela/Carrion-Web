@@ -50,7 +50,8 @@ function PaginaBase() {
 
 useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
+    const rol = localStorage.getItem('rol');
+  if (!token || rol !== 'Alumno') {
       setMounted(true);
 
       navigate('login');

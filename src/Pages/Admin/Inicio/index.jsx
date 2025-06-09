@@ -1,6 +1,18 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-function PaginaProfe() {
+function PagionaAdmin() {
+  const navigate = useNavigate();
+
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  const rol = localStorage.getItem('rol');
+
+  if (!token || rol !== 'Admin') {
+    navigate('/login');
+  }
+}, [navigate]);
+
   return (
     <div>
       <h2>Zona del Admin</h2>
@@ -10,4 +22,4 @@ function PaginaProfe() {
   );
 }
 
-export default PaginaProfe;
+export default PagionaAdmin;

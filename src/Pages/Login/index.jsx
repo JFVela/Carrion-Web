@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState,useEffect } from 'react';
+import { useNavigate,useLocation  } from 'react-router-dom';
 import { API_ENDPOINTS } from '../../api/endpoints.js'
 import { jwtDecode } from 'jwt-decode';
 
@@ -9,6 +9,29 @@ const Login = () => {
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState(null);
  const navigate = useNavigate();
+ const location = useLocation();
+
+ useEffect(() => {
+  const token = localStorage.getItem('token');
+  const rol = localStorage.getItem('rol');
+
+  if (token && rol) {
+    try {
+      const decoded = jwtDecode(token);
+      const ahora = Date.now() / 1000;
+
+      if (decoded.exp > ahora) {
+        if (rol === 'Admin') navigate('/admin');
+        else if (rol === 'Profesor') navigate('/profesor');
+        else if (rol === 'Alumno') navigate('/');
+      } else {
+        localStorage.clear(); // Token expirado
+      }
+    } catch (error) {
+      localStorage.clear(); // Token inválido
+    }
+  }
+}, [location]);
  
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,7 +71,7 @@ const Login = () => {
 
         console.log('Autenticación exitosa');
         // Aquí puedes redirigir o cambiar de vista
-        const rol= localStorage.getItem('rol');
+     const rol = decoded.data.rol;
 console.log(rol);
 
         if(rol=='Admin'){
