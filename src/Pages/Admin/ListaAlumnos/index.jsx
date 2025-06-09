@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from '../../../api/endpoints.js'
 import "./Estilos/page.css"
 import { useNavigate, useLocation } from 'react-router-dom';
 
+
 export default function CrudAlumnos() {
   // Estados principales
   const navigate = useNavigate();
@@ -103,6 +104,7 @@ export default function CrudAlumnos() {
   }
   /**EDITAR HACER UN PATCH*/
   // Guardar alumno (agregar o editar)
+  /*
   const guardarAlumno = (datosAlumno) => {
     if (alumnoEditando) {
       // Editar alumno existente
@@ -121,6 +123,45 @@ export default function CrudAlumnos() {
     setModalAbierto(false)
     setAlumnoEditando(null)
   }
+*/
+
+const guardarAlumno = async (datosAlumno) => {
+  try {
+    const token = localStorage.getItem("token"); // Ajusta según dónde guardes el JWT
+    console.log(datosAlumno);
+    
+
+    const response = await fetch(API_ENDPOINTS.CREAR_ALUMNO, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify(datosAlumno),
+    });
+
+    const result = await response.json();
+console.log(result);
+
+    if (!response.ok) {
+      alert(result.error || "Error al agregar el alumno");
+      return;
+    }
+
+    // Suponiendo que la API devuelve el alumno creado
+    setAlumnos((prev) => [...prev, result.alumno || datosAlumno]);
+
+    setModalAbierto(false);
+    setAlumnoEditando(null);
+
+  } catch (error) {
+    console.error("Error al agregar alumno:", error);
+    alert("Error de conexión al agregar alumno");
+  }
+};
+
+
+
 
   return (
     <div className="crud-container">
