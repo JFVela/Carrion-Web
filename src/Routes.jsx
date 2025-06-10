@@ -15,7 +15,7 @@ import TomarAsistencia from "./Pages/Profesor/TomarAsistencia";
 //Paginas de administración
 import PaginaAdmin from "./Pages/Admin/PaginaBase";
 import InicioAdmin from "./Pages/Admin/Inicio";
-import ListaAlumnos from "./Pages/Admin/ListaAlumnos";
+import GestionAlumno from "./Pages/Admin/GestionAlumno";
 import GestionDocente from "./Pages/Admin/GestionDocente";
 
 function AppRoutes() {
@@ -39,7 +39,7 @@ function AppRoutes() {
 
       <Route path="/admin" element={<PaginaAdmin />}>
         <Route index element={<InicioAdmin />} />
-        <Route path="gestion-alumnos" element={<ListaAlumnos />} />
+        <Route path="gestion-alumnos" element={<GestionAlumno />} />
         <Route path="gestion-profesores" element={<GestionDocente />} />
       </Route>
     </Routes>
