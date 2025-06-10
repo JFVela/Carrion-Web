@@ -1,29 +1,28 @@
 import { useState, useEffect } from "react";
 import { Container, Typography, Box, Paper } from "@mui/material";
 import { Api, PeopleAlt } from "@mui/icons-material";
-import TablaAlumnos from "./Componentes/TablaAlumnos";
+import TablaDocentes from "./Componentes/TablaDocentes.jsx";
 import BarraHerramientas from "./Componentes/BarraHerramientas";
-import ModalAlumno from "./Componentes/ModalAlumno";
-// import { alumnosIniciales } from "./alumnos"
+import ModalDocente from "./Componentes/ModalDocente.jsx";
 import { API_ENDPOINTS } from "../../../api/endpoints.js";
 import "./Estilos/page.css";
 import { useNavigate, useLocation } from "react-router-dom";
 
-export default function CrudAlumnos() {
+export default function CrudDocentes() {
   // Estados principales
   const navigate = useNavigate();
 
-  const [alumnos, setAlumnos] = useState([]);
-  const [alumnosFiltrados, setAlumnosFiltrados] = useState([]);
+  const [docentes, setDocentes] = useState([]);
+  const [docentesFiltrados, setDocentesFiltrados] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [alumnoEditando, setAlumnoEditando] = useState(null);
+  const [docenteEditando, setDocenteEditando] = useState(null);
   const [ordenamiento, setOrdenamiento] = useState({
     campo: "id",
     direccion: "asc",
   });
 
-  const obtenerAlumnos = async () => {
+  const obtenerDocentes = async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(API_ENDPOINTS.GET_USERS, {
@@ -47,31 +46,31 @@ export default function CrudAlumnos() {
       const data = await response.json();
       console.log(data);
 
-      setAlumnos(data);
-      setAlumnosFiltrados(data);
+      setDocentes(data);
+      setDocentesFiltrados(data);
     } catch (error) {
-      console.error("Error al obtener los alumnos:", error);
+      console.error("Error al obtener los docentes:", error);
     }
   };
 
   // Inicializar datos
   useEffect(() => {
-    obtenerAlumnos();
+    obtenerDocentes();
   }, []);
 
   // Función de búsqueda dinámica
   useEffect(() => {
     if (!busqueda.trim()) {
-      setAlumnosFiltrados(alumnos);
+      setDocentesFiltrados(docentes);
     } else {
-      const filtrados = alumnos.filter((alumno) =>
-        Object.values(alumno).some((valor) =>
+      const filtrados = docentes.filter((docente) =>
+        Object.values(docente).some((valor) =>
           valor.toLowerCase().includes(busqueda.toLowerCase())
         )
       );
-      setAlumnosFiltrados(filtrados);
+      setDocentesFiltrados(filtrados);
     }
-  }, [busqueda, alumnos]);
+  }, [busqueda, docentes]);
 
   // Función de ordenamiento
   const ordenarPor = (campo) => {
@@ -81,7 +80,7 @@ export default function CrudAlumnos() {
         : "asc";
     setOrdenamiento({ campo, direccion: nuevaDireccion });
 
-    const alumnosOrdenados = [...alumnosFiltrados].sort((a, b) => {
+    const docentesOrdenados = [...docentesFiltrados].sort((a, b) => {
       const valorA = a[campo].toLowerCase();
       const valorB = b[campo].toLowerCase();
 
@@ -92,47 +91,47 @@ export default function CrudAlumnos() {
       }
     });
 
-    setAlumnosFiltrados(alumnosOrdenados);
+    setDocentesFiltrados(docentesOrdenados);
   };
 
-  // Abrir modal para agregar alumno
+  // Abrir modal para agregar docente
   const abrirModalAgregar = () => {
-    setAlumnoEditando(null);
+    setDocenteEditando(null);
     setModalAbierto(true);
   };
 
-  // Abrir modal para editar alumno
-  const abrirModalEditar = (alumno) => {
-    setAlumnoEditando(alumno);
+  // Abrir modal para editar docente
+  const abrirModalEditar = (docente) => {
+    setDocenteEditando(docente);
     setModalAbierto(true);
   };
   /**EDITAR HACER UN PATCH*/
-  // Guardar alumno (agregar o editar)
+  // Guardar docente (agregar o editar)
   /*
-  const guardarAlumno = (datosAlumno) => {
-    if (alumnoEditando) {
-      // Editar alumno existente
-      setAlumnos((prev) =>
-        prev.map((alumno) => (alumno.id === alumnoEditando.id ? { ...datosAlumno, id: alumnoEditando.id } : alumno)),
+  const guardarDocente = (datosDocente) => {
+    if (docenteEditando) {
+      // Editar docente existente
+      setDocentes((prev) =>
+        prev.map((docente) => (docente.id === docenteEditando.id ? { ...datosDocente, id: docenteEditando.id } : docente)),
       )
     } else {
-      // Agregar nuevo alumno
-      const nuevoAlumno = {
-        ...datosAlumno,
-        id: (alumnos.length + 1).toString(),
+      // Agregar nuevo docente
+      const nuevoDocente = {
+        ...datosDocente,
+        id: (docentes.length + 1).toString(),
       }
-      setAlumnos((prev) => [...prev, nuevoAlumno])
+      setDocentes((prev) => [...prev, nuevoDocente])
     }
 
     setModalAbierto(false)
-    setAlumnoEditando(null)
+    setDocenteEditando(null)
   }
 */
 
-  const guardarAlumno = async (datosAlumno) => {
+  const guardarDocente = async (datosDocente) => {
     try {
       const token = localStorage.getItem("token"); // Ajusta según dónde guardes el JWT
-      console.log(datosAlumno);
+      console.log(datosDocente);
 
       const response = await fetch(API_ENDPOINTS.CREAR_ALUMNO, {
         method: "POST",
@@ -140,25 +139,25 @@ export default function CrudAlumnos() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(datosAlumno),
+        body: JSON.stringify(datosDocente),
       });
 
       const result = await response.json();
       console.log(result);
 
       if (!response.ok) {
-        alert(result.error || "Error al agregar el alumno");
+        alert(result.error || "Error al agregar el docente");
         return;
       }
 
-      // Suponiendo que la API devuelve el alumno creado
-      await obtenerAlumnos();
+      // Suponiendo que la API devuelve el docente creado
+      await obtenerDocentes();
 
       setModalAbierto(false);
-      setAlumnoEditando(null);
+      setDocenteEditando(null);
     } catch (error) {
-      console.error("Error al agregar alumno:", error);
-      alert("Error de conexión al agregar alumno");
+      console.error("Error al agregar docente:", error);
+      alert("Error de conexión al agregar docente");
     }
   };
 
@@ -172,10 +171,10 @@ export default function CrudAlumnos() {
           </Box>
           <Box>
             <Typography variant="h4" component="h1" className="header-title">
-              Gestión de Alumnos
+              Gestión de Docentes
             </Typography>
             <Typography variant="body1" color="textSecondary">
-              Administra la información de los estudiantes
+              Administra la información de los profesores
             </Typography>
           </Box>
         </Box>
@@ -186,34 +185,34 @@ export default function CrudAlumnos() {
             busqueda={busqueda}
             setBusqueda={setBusqueda}
             abrirModalAgregar={abrirModalAgregar}
-            totalAlumnos={alumnos.length}
-            alumnosFiltrados={alumnosFiltrados.length}
+            totalDocentes={docentes.length}
+            docentesFiltrados={docentesFiltrados.length}
             mostrarFiltrados={busqueda.length > 0}
           />
         </Paper>
 
-        {/* Tabla de alumnos */}
+        {/* Tabla de docentes */}
         <Paper elevation={3} className="table-paper">
-          <TablaAlumnos
-            alumnos={alumnosFiltrados}
+          <TablaDocentes
+            docentes={docentesFiltrados}
             ordenamiento={ordenamiento}
             ordenarPor={ordenarPor}
             abrirModalEditar={abrirModalEditar}
           />
         </Paper>
 
-        {/* Modal para agregar/editar alumno */}
-        <ModalAlumno
+        {/* Modal para agregar/editar docente */}
+        <ModalDocente
           open={modalAbierto}
           onClose={() => setModalAbierto(false)}
-          alumno={alumnoEditando}
-          onGuardar={guardarAlumno}
+          docente={docenteEditando}
+          onGuardar={guardarDocente}
         />
 
         {/* Footer */}
         <Box className="footer">
           <Typography variant="body2" color="textSecondary">
-            Sistema de Gestión de Alumnos - Desarrollado con ❤️
+            Sistema de Gestión de Docentes - Desarrollado con ❤️
           </Typography>
         </Box>
       </Container>

@@ -13,8 +13,10 @@ import PaginaProfe from "./Pages/Profesor/Inicio";
 import TomarAsistencia from "./Pages/Profesor/TomarAsistencia";
 
 //Paginas de administración
-import PaginaAdmin from "./Pages/Admin/Inicio";
+import PaginaAdmin from "./Pages/Admin/PaginaBase";
+import InicioAdmin from "./Pages/Admin/Inicio";
 import ListaAlumnos from "./Pages/Admin/ListaAlumnos";
+import GestionDocente from "./Pages/Admin/GestionDocente";
 
 function AppRoutes() {
   return (
@@ -22,7 +24,7 @@ function AppRoutes() {
       {/* Rutas del alumno */}
       <Route path="/" element={<PaginaBase />}>
         <Route index element={<Inicio />} />
-        <Route path="login" element={< Login/>} />
+        <Route path="login" element={<Login />} />
         <Route path="cursos" element={<Cursos />} />
         <Route path="asistencias" element={<Asistencias />} />
         <Route path="trucos" element={<Trucos />} />
@@ -36,9 +38,10 @@ function AppRoutes() {
       </Route>
 
       <Route path="/admin" element={<PaginaAdmin />}>
+        <Route index element={<InicioAdmin />} />
         <Route path="gestion-alumnos" element={<ListaAlumnos />} />
+        <Route path="gestion-profesores" element={<GestionDocente />} />
       </Route>
-
     </Routes>
   );
 }
