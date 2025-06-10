@@ -11,9 +11,10 @@ export const COLUMNAS_TABLA = [
 
 // Definición de los campos del formulario
 export const CAMPOS_FORMULARIO = [
+  { key: "dni", label: "DNI", type: "number", required: true },
   { key: "nombre", label: "Nombre", type: "text", required: true },
   { key: "apellido1", label: "Primer Apellido", type: "text", required: true },
   { key: "apellido2", label: "Segundo Apellido", type: "text", required: true },
-  { key: "gradoSeccion", label: "Grado y Sección", type: "text", required: true },
+  { key: "gradoSeccion", label: "Grado y nivel", type: "text", required: true },
   { key: "sede", label: "Sede", type: "text", required: true },
 ]

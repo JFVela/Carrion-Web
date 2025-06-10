@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -8,10 +6,13 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
   Typography,
-  Box,
 } from "@mui/material";
+
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+
 import { CAMPOS_FORMULARIO } from "../configuracion";
 import "../Estilos/modal.css";
 
@@ -88,6 +89,37 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
     }
   };
 
+  // Estado para el grado y nivel académico
+  const [gradoNivel, setGrado] = useState("");
+
+  // Datos de grados y niveles académicos
+  const grados = [
+    { valor: "1ro_sec", nombre: "1RO SECUNDARIA" },
+    { valor: "2do_sec", nombre: "2DO SECUNDARIA" },
+    { valor: "3ro_sec", nombre: "3RO SECUNDARIA" },
+    { valor: "4to_sec", nombre: "4TO SECUNDARIA" },
+    { valor: "5to_sec", nombre: "5TO SECUNDARIA" },
+  ];
+
+  // Función para manejar el cambio en el select de grado
+  const evento = (event) => {
+    setGrado(event.target.value);
+  };
+
+  // Variables de estado
+  const [sede, setSede] = useState("");
+
+  // Datos de sedes
+  const sedes = [
+    { valor: "sede-carrion", nombre: "Sede Carrion" },
+    { valor: "sede-britanico", nombre: "Sede Britanico" },
+  ];
+
+  // Función para manejar cambios
+  const manejarCambioSede = (evento) => {
+    setSede(evento.target.value);
+  };
+
   return (
     <Dialog
       open={open}
@@ -110,6 +142,22 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
                   Información Personal
                 </Typography>
                 <div className="grupo-campos">
+                  <div className="campo-completo">
+                    <TextField
+                      name="dni"
+                      label="DNI"
+                      type="number"
+                      value={formData.dni}
+                      onChange={handleChange}
+                      required
+                      error={!!errores.dni}
+                      helperText={errores.dni}
+                      fullWidth
+                      variant="outlined"
+                      margin="dense"
+                      className="campo-formulario"
+                    />
+                  </div>
                   <div className="campo-completo">
                     <TextField
                       name="nombre"
@@ -167,34 +215,80 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
                 </Typography>
                 <div className="grupo-campos">
                   <div className="campo-completo">
-                    <TextField
-                      name="gradoSeccion"
-                      label="Grado y Sección"
-                      value={formData.gradoSeccion}
-                      onChange={handleChange}
-                      required
-                      error={!!errores.gradoSeccion}
-                      helperText={errores.gradoSeccion}
+                    <InputLabel>Grado</InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      value={gradoNivel}
+                      label="Grado"
+                      onChange={evento}
                       fullWidth
                       variant="outlined"
                       margin="dense"
                       className="campo-formulario"
-                    />
+                      required
+                      displayEmpty
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 200, // Altura máxima del dropdown
+                            width: 250,
+                          },
+                        },
+                      }}
+                      renderValue={(selected) => {
+                        if (!selected) {
+                          return <em>Ingrese grado y nivel académico</em>;
+                        }
+                        return (
+                          grados.find((g) => g.valor === selected)?.nombre ||
+                          selected
+                        );
+                      }}
+                    >
+                      <MenuItem value="" disabled>
+                        <em>Ingrese grado y nivel académico</em>
+                      </MenuItem>
+                      {grados.map((grado) => (
+                        <MenuItem key={grado.valor} value={grado.valor}>
+                          {grado.nombre}
+                        </MenuItem>
+                      ))}
+                    </Select>
                   </div>
                   <div className="campo-completo">
-                    <TextField
-                      name="sede"
+                    <InputLabel>Sede</InputLabel>
+                    <Select
+                      labelId="select-sede-label"
+                      id="select-sede"
+                      value={sede}
                       label="Sede"
-                      value={formData.sede}
-                      onChange={handleChange}
-                      required
-                      error={!!errores.sede}
-                      helperText={errores.sede}
+                      onChange={manejarCambioSede}
                       fullWidth
                       variant="outlined"
                       margin="dense"
                       className="campo-formulario"
-                    />
+                      required
+                      displayEmpty
+                      renderValue={(selected) => {
+                        if (!selected) {
+                          return <em>Ingrese la Sede</em>;
+                        }
+                        return (
+                          sedes.find((s) => s.valor === selected)?.nombre ||
+                          selected
+                        );
+                      }}
+                    >
+                      <MenuItem value="" disabled>
+                        <em>Ingrese la Sede</em>
+                      </MenuItem>
+                      {sedes.map((sede) => (
+                        <MenuItem key={sede.valor} value={sede.valor}>
+                          {sede.nombre}
+                        </MenuItem>
+                      ))}
+                    </Select>
                   </div>
                 </div>
               </section>
