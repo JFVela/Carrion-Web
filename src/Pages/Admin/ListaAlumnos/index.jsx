@@ -24,9 +24,7 @@ export default function CrudAlumnos() {
     direccion: "asc",
   })
 
-  // Inicializar datos
-  useEffect(() => {
-    const obtenerAlumnos = async () => {
+  const obtenerAlumnos = async () => {
       try {
         const token = localStorage.getItem("token")
         const response = await fetch(API_ENDPOINTS.GET_USERS, {
@@ -57,6 +55,8 @@ export default function CrudAlumnos() {
       }
     };
 
+  // Inicializar datos
+  useEffect(() => {
     obtenerAlumnos();
   }, []);
 
@@ -149,7 +149,7 @@ console.log(result);
     }
 
     // Suponiendo que la API devuelve el alumno creado
-    setAlumnos((prev) => [...prev, result.alumno || datosAlumno]);
+    await obtenerAlumnos();
 
     setModalAbierto(false);
     setAlumnoEditando(null);
