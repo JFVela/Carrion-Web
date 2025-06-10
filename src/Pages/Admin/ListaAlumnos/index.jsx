@@ -151,6 +151,7 @@ console.log(result);
     // Suponiendo que la API devuelve el alumno creado
     await obtenerAlumnos();
 
+    
     setModalAbierto(false);
     setAlumnoEditando(null);
 
