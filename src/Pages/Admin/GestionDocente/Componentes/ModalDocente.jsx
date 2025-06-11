@@ -8,14 +8,12 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
   Typography,
-  Box,
 } from "@mui/material";
 import { CAMPOS_FORMULARIO } from "../configuracion";
 import "../Estilos/modal.css";
 
-export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
+export default function ModalDocente({ open, onClose, docente, onGuardar }) {
   const [formData, setFormData] = useState({
     nombre: "",
     apellido1: "",
@@ -26,18 +24,18 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
 
   const [errores, setErrores] = useState({});
 
-  // Cargar datos del alumno cuando se abre el modal para editar
+  // Cargar datos del docente cuando se abre el modal para editar
   useEffect(() => {
-    if (alumno) {
+    if (docente) {
       setFormData({
-        nombre: alumno.nombre || "",
-        apellido1: alumno.apellido1 || "",
-        apellido2: alumno.apellido2 || "",
-        gradoSeccion: alumno.gradoSeccion || "",
-        sede: alumno.sede || "",
+        nombre: docente.nombre || "",
+        apellido1: docente.apellido1 || "",
+        apellido2: docente.apellido2 || "",
+        gradoSeccion: docente.gradoSeccion || "",
+        sede: docente.sede || "",
       });
     } else {
-      // Resetear el formulario si es un nuevo alumno
+      // Resetear el formulario si es un nuevo docente
       setFormData({
         nombre: "",
         apellido1: "",
@@ -47,7 +45,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
       });
     }
     setErrores({});
-  }, [alumno, open]);
+  }, [docente, open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -94,10 +92,10 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      className="modal-alumno"
+      className="modal-docente"
     >
       <DialogTitle className="modal-titulo">
-        {alumno ? "Editar Alumno" : "Agregar Nuevo Alumno"}
+        {docente ? "Editar Docente" : "Agregar Nuevo Docente"}
       </DialogTitle>
 
       <form onSubmit={handleSubmit}>
@@ -212,7 +210,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
             color="primary"
             className="boton-guardar"
           >
-            {alumno ? "Actualizar" : "Guardar"}
+            {docente ? "Actualizar" : "Guardar"}
           </Button>
         </DialogActions>
       </form>
