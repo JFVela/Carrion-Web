@@ -26,7 +26,7 @@ export default function CrudAlumnos() {
   const obtenerAlumnos = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(API_ENDPOINTS.GET_USERS, {
+      const response = await fetch(API_ENDPOINTS.OBTENER_ALUMNOS, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
