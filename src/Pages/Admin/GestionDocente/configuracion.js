@@ -4,10 +4,12 @@ export const COLUMNAS_TABLA = [
   { key: "nombre", label: "Nombre", sortable: true },
   { key: "apellido1", label: "Primer Apellido", sortable: true },
   { key: "apellido2", label: "Segundo Apellido", sortable: true },
-  { key: "grado", label: "Grado y Sección", sortable: true },
   { key: "sede", label: "Sede", sortable: true },
   { key: "acciones", label: "Acciones", sortable: false },
 ]
+/**
+ *   { key: "grado", label: "Grado y Sección", sortable: true },
+ */
 
 // Definición de los campos del formulario
 export const CAMPOS_FORMULARIO = [

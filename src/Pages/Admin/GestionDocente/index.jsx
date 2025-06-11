@@ -25,7 +25,7 @@ export default function CrudDocentes() {
   const obtenerDocentes = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(API_ENDPOINTS.GET_USERS, {
+      const response = await fetch(API_ENDPOINTS.OBTENER_PROFESORES, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
