@@ -7,55 +7,111 @@ import {
   TextField,
   Button,
   Typography,
+  InputLabel,
+  MenuItem,
+  Select,
+  FormControl,
 } from "@mui/material";
-
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-
-import { CAMPOS_FORMULARIO } from "../configuracion";
 import "../Estilos/modal.css";
 
 export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
+  // Estado unificado para todos los campos del formulario
   const [formData, setFormData] = useState({
+    dni: "",
     nombre: "",
     apellido1: "",
     apellido2: "",
-    gradoSeccion: "",
+    nivelEstudio: "",
+    grado: "",
     sede: "",
   });
 
   const [errores, setErrores] = useState({});
 
+  // Datos de niveles de estudio
+  const nivelesEstudio = [
+    { valor: 1, nombre: "Primaria" },
+    { valor: 2, nombre: "Secundaria" },
+  ];
+
+  // Datos de grados según el nivel
+  const gradosPrimaria = [
+    { valor: 1, nombre: "1ro" },
+    { valor: 2, nombre: "2do" },
+    { valor: 3, nombre: "3ro" },
+    { valor: 4, nombre: "4to" },
+    { valor: 5, nombre: "5to" },
+    { valor: 6, nombre: "6to" },
+  ];
+
+  const gradosSecundaria = [
+    { valor: 1, nombre: "1ro" },
+    { valor: 2, nombre: "2do" },
+    { valor: 3, nombre: "3ro" },
+    { valor: 4, nombre: "4to" },
+    { valor: 5, nombre: "5to" },
+  ];
+
+  // Datos de sedes con nuevos valores
+  const sedes = [
+    { valor: 1, nombre: "Sede Carrión" },
+    { valor: 2, nombre: "Sede Británico" },
+  ];
+
+  // Función para obtener los grados disponibles según el nivel seleccionado
+  const obtenerGradosDisponibles = () => {
+    if (formData.nivelEstudio === 1) {
+      return gradosPrimaria;
+    } else if (formData.nivelEstudio === 2) {
+      return gradosSecundaria;
+    }
+    return [];
+  };
+
   // Cargar datos del alumno cuando se abre el modal para editar
   useEffect(() => {
     if (alumno) {
       setFormData({
+        dni: alumno.dni || "",
         nombre: alumno.nombre || "",
         apellido1: alumno.apellido1 || "",
         apellido2: alumno.apellido2 || "",
-        gradoSeccion: alumno.gradoSeccion || "",
+        nivelEstudio: alumno.nivelEstudio || "",
+        grado: alumno.grado || "",
         sede: alumno.sede || "",
       });
     } else {
       // Resetear el formulario si es un nuevo alumno
       setFormData({
+        dni: "",
         nombre: "",
         apellido1: "",
         apellido2: "",
-        gradoSeccion: "",
+        nivelEstudio: "",
+        grado: "",
         sede: "",
       });
     }
     setErrores({});
   }, [alumno, open]);
 
-  const handleChange = (e) => {
+  // Función unificada para manejar cambios en todos los campos
+  const manejarCambio = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+
+    // Si cambia el nivel de estudio, resetear el grado
+    if (name === "nivelEstudio") {
+      setFormData({
+        ...formData,
+        [name]: value,
+        grado: "", // Resetear grado cuando cambia el nivel
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
 
     // Limpiar error cuando el usuario escribe
     if (errores[name]) {
@@ -64,60 +120,62 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
         [name]: "",
       });
     }
+
+    // También limpiar error de grado si se cambia el nivel
+    if (name === "nivelEstudio" && errores.grado) {
+      setErrores({
+        ...errores,
+        [name]: "",
+        grado: "",
+      });
+    }
   };
 
   const validarFormulario = () => {
     const nuevosErrores = {};
     let esValido = true;
 
-    CAMPOS_FORMULARIO.forEach((campo) => {
-      if (campo.required && !formData[campo.key]) {
-        nuevosErrores[campo.key] = `El campo ${campo.label} es obligatorio`;
+    // Validar campos requeridos
+    const camposRequeridos = [
+      "dni",
+      "nombre",
+      "apellido1",
+      "apellido2",
+      "nivelEstudio",
+      "grado",
+      "sede",
+    ];
+
+    camposRequeridos.forEach((campo) => {
+      if (!formData[campo] || formData[campo].toString().trim() === "") {
+        nuevosErrores[campo] = `El campo es obligatorio`;
         esValido = false;
       }
     });
+
+    // Validar DNI (debe tener 8 dígitos)
+    if (formData.dni && formData.dni.length !== 8) {
+      nuevosErrores.dni = "El DNI debe tener 8 dígitos";
+      esValido = false;
+    }
+
+    // Validar que se haya seleccionado un nivel antes del grado
+    if (formData.grado && !formData.nivelEstudio) {
+      nuevosErrores.nivelEstudio =
+        "Debe seleccionar primero el nivel de estudio";
+      esValido = false;
+    }
 
     setErrores(nuevosErrores);
     return esValido;
   };
 
-  const handleSubmit = (e) => {
+  const manejarEnvio = (e) => {
     e.preventDefault();
 
     if (validarFormulario()) {
       onGuardar(formData);
     }
-  };
-
-  // Estado para el grado y nivel académico
-  const [gradoNivel, setGrado] = useState("");
-
-  // Datos de grados y niveles académicos
-  const grados = [
-    { valor: "1ro_sec", nombre: "1RO SECUNDARIA" },
-    { valor: "2do_sec", nombre: "2DO SECUNDARIA" },
-    { valor: "3ro_sec", nombre: "3RO SECUNDARIA" },
-    { valor: "4to_sec", nombre: "4TO SECUNDARIA" },
-    { valor: "5to_sec", nombre: "5TO SECUNDARIA" },
-  ];
-
-  // Función para manejar el cambio en el select de grado
-  const evento = (event) => {
-    setGrado(event.target.value);
-  };
-
-  // Variables de estado
-  const [sede, setSede] = useState("");
-
-  // Datos de sedes
-  const sedes = [
-    { valor: "sede-carrion", nombre: "Sede Carrion" },
-    { valor: "sede-britanico", nombre: "Sede Britanico" },
-  ];
-
-  // Función para manejar cambios
-  const manejarCambioSede = (evento) => {
-    setSede(evento.target.value);
   };
 
   return (
@@ -132,7 +190,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
         {alumno ? "Editar Alumno" : "Agregar Nuevo Alumno"}
       </DialogTitle>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={manejarEnvio}>
         <DialogContent className="modal-contenido">
           <section className="fila-formulario">
             {/* Información Personal */}
@@ -148,7 +206,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
                       label="DNI"
                       type="number"
                       value={formData.dni}
-                      onChange={handleChange}
+                      onChange={manejarCambio}
                       required
                       error={!!errores.dni}
                       helperText={errores.dni}
@@ -156,6 +214,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
                       variant="outlined"
                       margin="dense"
                       className="campo-formulario"
+                      inputProps={{ maxLength: 8 }}
                     />
                   </div>
                   <div className="campo-completo">
@@ -163,7 +222,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
                       name="nombre"
                       label="Nombre"
                       value={formData.nombre}
-                      onChange={handleChange}
+                      onChange={manejarCambio}
                       required
                       error={!!errores.nombre}
                       helperText={errores.nombre}
@@ -178,7 +237,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
                       name="apellido1"
                       label="Primer Apellido"
                       value={formData.apellido1}
-                      onChange={handleChange}
+                      onChange={manejarCambio}
                       required
                       error={!!errores.apellido1}
                       helperText={errores.apellido1}
@@ -193,7 +252,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
                       name="apellido2"
                       label="Segundo Apellido"
                       value={formData.apellido2}
-                      onChange={handleChange}
+                      onChange={manejarCambio}
                       required
                       error={!!errores.apellido2}
                       helperText={errores.apellido2}
@@ -214,81 +273,128 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
                   Información Académica
                 </Typography>
                 <div className="grupo-campos">
+                  {/* Select de Nivel de Estudio */}
                   <div className="campo-completo">
-                    <InputLabel>Grado</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={gradoNivel}
-                      label="Grado"
-                      onChange={evento}
+                    <FormControl
                       fullWidth
                       variant="outlined"
                       margin="dense"
-                      className="campo-formulario"
+                      error={!!errores.nivelEstudio}
                       required
-                      displayEmpty
-                      MenuProps={{
-                        PaperProps: {
-                          style: {
-                            maxHeight: 200, // Altura máxima del dropdown
-                            width: 250,
-                          },
-                        },
-                      }}
-                      renderValue={(selected) => {
-                        if (!selected) {
-                          return <em>Ingrese grado y nivel académico</em>;
-                        }
-                        return (
-                          grados.find((g) => g.valor === selected)?.nombre ||
-                          selected
-                        );
-                      }}
                     >
-                      <MenuItem value="" disabled>
-                        <em>Ingrese grado y nivel académico</em>
-                      </MenuItem>
-                      {grados.map((grado) => (
-                        <MenuItem key={grado.valor} value={grado.valor}>
-                          {grado.nombre}
-                        </MenuItem>
-                      ))}
-                    </Select>
+                      <InputLabel>Nivel de Estudio</InputLabel>
+                      <Select
+                        name="nivelEstudio"
+                        value={formData.nivelEstudio}
+                        label="Nivel de Estudio"
+                        onChange={manejarCambio}
+                        className="campo-formulario"
+                        displayEmpty
+                      >
+                        <em>Seleccione el nivel de estudio</em>
+                        {nivelesEstudio.map((nivel) => (
+                          <MenuItem key={nivel.valor} value={nivel.valor}>
+                            {nivel.nombre}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {errores.nivelEstudio && (
+                        <Typography
+                          variant="caption"
+                          color="error"
+                          sx={{ mt: 0.5, ml: 1.5 }}
+                        >
+                          {errores.nivelEstudio}
+                        </Typography>
+                      )}
+                    </FormControl>
                   </div>
+
+                  {/* Select de Grado - Solo se muestra si hay nivel seleccionado */}
                   <div className="campo-completo">
-                    <InputLabel>Sede</InputLabel>
-                    <Select
-                      labelId="select-sede-label"
-                      id="select-sede"
-                      value={sede}
-                      label="Sede"
-                      onChange={manejarCambioSede}
+                    <FormControl
                       fullWidth
                       variant="outlined"
                       margin="dense"
-                      className="campo-formulario"
+                      error={!!errores.grado}
                       required
-                      displayEmpty
-                      renderValue={(selected) => {
-                        if (!selected) {
-                          return <em>Ingrese la Sede</em>;
-                        }
-                        return (
-                          sedes.find((s) => s.valor === selected)?.nombre ||
-                          selected
-                        );
-                      }}
+                      disabled={!formData.nivelEstudio}
                     >
-                      <MenuItem value="" disabled>
-                        <em>Ingrese la Sede</em>
-                      </MenuItem>
-                      {sedes.map((sede) => (
-                        <MenuItem key={sede.valor} value={sede.valor}>
-                          {sede.nombre}
-                        </MenuItem>
-                      ))}
-                    </Select>
+                      <InputLabel>Grado</InputLabel>
+                      <Select
+                        name="grado"
+                        value={formData.grado}
+                        label="Grado"
+                        onChange={manejarCambio}
+                        className="campo-formulario"
+                        displayEmpty
+                        MenuProps={{
+                          PaperProps: {
+                            style: {
+                              maxHeight: 200,
+                              width: 250,
+                            },
+                          },
+                        }}
+                      >
+                        <em>
+                          {formData.nivelEstudio
+                            ? "Seleccione el grado"
+                            : "Primero seleccione el nivel de estudio"}
+                        </em>
+                        {obtenerGradosDisponibles().map((grado) => (
+                          <MenuItem key={grado.valor} value={grado.valor}>
+                            {grado.nombre}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {errores.grado && (
+                        <Typography
+                          variant="caption"
+                          color="error"
+                          sx={{ mt: 0.5, ml: 1.5 }}
+                        >
+                          {errores.grado}
+                        </Typography>
+                      )}
+                    </FormControl>
+                  </div>
+
+                  {/* Select de Sede */}
+                  <div className="campo-completo">
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      margin="dense"
+                      error={!!errores.sede}
+                      required
+                    >
+                      <InputLabel>Sede</InputLabel>
+                      <Select
+                        name="sede"
+                        value={formData.sede}
+                        label="Sede"
+                        onChange={manejarCambio}
+                        className="campo-formulario"
+                        displayEmpty
+                      >
+                        <em>Seleccione la Sede</em>
+                        {sedes.map((sede) => (
+                          <MenuItem key={sede.valor} value={sede.valor}>
+                            {sede.nombre}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {errores.sede && (
+                        <Typography
+                          variant="caption"
+                          color="error"
+                          sx={{ mt: 0.5, ml: 1.5 }}
+                        >
+                          {errores.sede}
+                        </Typography>
+                      )}
+                    </FormControl>
                   </div>
                 </div>
               </section>
