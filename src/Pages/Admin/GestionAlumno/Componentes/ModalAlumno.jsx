@@ -191,7 +191,10 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
       </DialogTitle>
 
       <form onSubmit={manejarEnvio}>
-        <DialogContent className="modal-contenido">
+        <DialogContent
+          className="modal-contenido"
+          sx={{ maxHeight: "70vh", overflowY: "auto" }}
+        >
           <section className="fila-formulario">
             {/* Información Personal */}
             <div className="columna-mitad">
