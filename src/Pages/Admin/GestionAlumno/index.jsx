@@ -151,7 +151,7 @@ export default function CrudAlumnos() {
         return;
       }
 
-      // Suponiendo que la API devuelve el alumno creado
+    
       await obtenerAlumnos();
 
       setModalAbierto(false);
