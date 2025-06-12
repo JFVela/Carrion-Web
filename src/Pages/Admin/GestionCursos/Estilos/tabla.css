@@ -1,0 +1,95 @@
+.tabla-container {
+  overflow: hidden;
+}
+
+.tabla-titulo {
+  background: linear-gradient(90deg, #673ab7 0%, #9c27b0 100%);
+  color: white !important;
+  padding: 1rem;
+  font-weight: 600 !important;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.tabla-alumnos {
+  min-width: 650px;
+}
+
+.columna-ordenable {
+  cursor: pointer;
+}
+
+.columna-ordenable:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.sort-icon {
+  color: #673ab7;
+  font-size: 1rem !important;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-button {
+  min-width: 0 !important;
+  padding: 4px !important;
+}
+
+.delete-button {
+  min-width: 0 !important;
+  padding: 4px !important;
+}
+
+.grado-chip {
+  background-color: rgba(103, 58, 183, 0.1) !important;
+  color: #673ab7 !important;
+  font-weight: 500 !important;
+}
+
+.sede-chip {
+  background-color: rgba(156, 39, 176, 0.1) !important;
+  color: #9c27b0 !important;
+  font-weight: 500 !important;
+}
+
+.id-text {
+  font-weight: 600 !important;
+}
+
+.empty-state {
+  padding: 3rem !important;
+  text-align: center;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.empty-icon {
+  font-size: 3rem !important;
+  color: #e0e0e0;
+}
+
+.row-even:hover,
+.row-odd:hover {
+  background-color: rgba(103, 58, 183, 0.04);
+}
+
+.row-odd {
+  background-color: rgba(0, 0, 0, 0.02);
+}

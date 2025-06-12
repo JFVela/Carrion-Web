@@ -13,6 +13,7 @@ import Navegador from "../../../Componentes/NavTabs.jsx";
 
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import Face4Icon from "@mui/icons-material/Face4";
 
 const tabs = [
@@ -33,6 +34,12 @@ const tabs = [
     value: "3",
     icon: <Face4Icon />,
     path: "/admin/gestion-profesores",
+  },
+  {
+    label: "Cursos",
+    value: "4",
+    icon: <AutoStoriesIcon />,
+    path: "/admin/gestion-cursos",
   },
 ];
 
