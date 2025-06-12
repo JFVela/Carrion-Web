@@ -127,13 +127,15 @@ export default function CrudCursos() {
 
       if (cursoEditando) {
         // Editar curso existente
-        endpoint = `${API_ENDPOINTS.ACTUALIZAR_CURSO}${cursoEditando.id}`
+        endpoint = `${API_ENDPOINTS.EDITAR_CURSO}${cursoEditando.id}`
         method = "PUT"
       } else {
         // Crear nuevo curso
         endpoint = API_ENDPOINTS.CREAR_CURSO
         method = "POST"
       }
+
+      console.log(endpoint)
 
       response = await fetch(endpoint, {
         method: method,
