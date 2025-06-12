@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -31,12 +29,12 @@ export default function ModalDocente({ open, onClose, docente, onGuardar }) {
     if (docente) {
       setFormData({
         dni: docente.dni || "",
-        nombreDocente: docente.nombreDocente || "",
-        apellidoPaterno: docente.apellidoPaterno || "",
-        apellidoMaterno: docente.apellidoMaterno || "",
+        nombreDocente: docente.nombreDocente || docente.nombre || "",
+        apellidoPaterno: docente.apellidoPaterno || docente.apellido1 || "",
+        apellidoMaterno: docente.apellidoMaterno || docente.apellido2 || "",
         telefono: docente.telefono || "",
         direccion: docente.direccion || "",
-        correoElectronico: docente.correoElectronico || "",
+        correoElectronico: docente.correoElectronico || docente.email || "",
       });
     } else {
       // Resetear el formulario si es un nuevo docente
@@ -88,7 +86,7 @@ export default function ModalDocente({ open, onClose, docente, onGuardar }) {
 
     camposRequeridos.forEach((campo) => {
       if (!formData[campo] || formData[campo].toString().trim() === "") {
-        nuevosErrores[campo] = `El campo es obligatorio`;
+        nuevosErrores[campo] = "El campo es obligatorio";
         esValido = false;
       }
     });

@@ -22,7 +22,7 @@ import {
 import { COLUMNAS_TABLA_DOCENTE } from "../configuracion";
 import "../Estilos/tabla.css";
 
-export default function TablaDocente({
+export default function TablaDocentes({
   docentes,
   ordenamiento,
   ordenarPor,
@@ -80,7 +80,7 @@ export default function TablaDocente({
           <Typography variant="body2">{docente[columna.key]}</Typography>
         </Box>
       );
-    } else if (columna.key === "correoElectronico") {
+    } else if (columna.key === "email") {
       return (
         <Tooltip title={docente[columna.key]} arrow>
           <Box
