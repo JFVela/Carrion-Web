@@ -133,7 +133,7 @@ export default function CrudDocentes() {
       const token = localStorage.getItem("token"); // Ajusta según dónde guardes el JWT
       console.log(datosDocente);
 
-      const response = await fetch(API_ENDPOINTS.CREAR_ALUMNO, {
+      const response = await fetch(API_ENDPOINTS.CREAR_PROFESOR, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
