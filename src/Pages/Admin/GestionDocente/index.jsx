@@ -5,7 +5,7 @@ import TablaDocentes from "./Componentes/TablaDocentes.jsx";
 import BarraHerramientas from "./Componentes/BarraHerramientas";
 import ModalDocente from "./Componentes/ModalDocente.jsx";
 import { docentesIniciales } from "./docente.js";
-// import { API_ENDPOINTS } from "../../../api/endpoints.js";
+import { API_ENDPOINTS } from "../../../api/endpoints.js";
 import "./Estilos/page.css";
 import { useNavigate } from "react-router-dom";
 
@@ -21,15 +21,12 @@ export default function CrudDocentes() {
     campo: "id",
     direccion: "asc",
   });
+  const [cargando, setCargando] = useState(false);
 
-  // Función para obtener docentes (ahora usa datos locales)
-  const obtenerDocentes = () => {
-    // Usar datos locales en lugar de la API
-    setDocentes(docentesIniciales);
-    setDocentesFiltrados(docentesIniciales);
-
-    /* CÓDIGO API COMENTADO
+  // Función para obtener docentes desde la API
+  const obtenerDocentes = async () => {
     try {
+      setCargando(true);
       const token = localStorage.getItem("token");
       const response = await fetch(API_ENDPOINTS.OBTENER_PROFESORES, {
         method: "GET",
@@ -38,23 +35,29 @@ export default function CrudDocentes() {
           "Content-Type": "application/json",
         },
       });
+
       if (!response.ok) {
         if (response.status === 401) {
-          console.log(response);
-          // Token inválido o expirado
+          console.log("Error de autenticación:", response);
           localStorage.clear();
           navigate("/login");
+          return;
         }
         throw new Error("Error en la respuesta del servidor");
       }
+
       const data = await response.json();
-      console.log(data);
+      console.log("Docentes obtenidos:", data);
       setDocentes(data);
       setDocentesFiltrados(data);
     } catch (error) {
       console.error("Error al obtener los docentes:", error);
+      // Usar datos locales como fallback en caso de error
+      setDocentes(docentesIniciales);
+      setDocentesFiltrados(docentesIniciales);
+    } finally {
+      setCargando(false);
     }
-    */
   };
 
   // Inicializar datos
@@ -68,11 +71,11 @@ export default function CrudDocentes() {
       setDocentesFiltrados(docentes);
     } else {
       const filtrados = docentes.filter((docente) =>
-        Object.values(docente).some(
-          (valor) =>
-            typeof valor === "string" &&
-            valor.toLowerCase().includes(busqueda.toLowerCase())
-        )
+        Object.values(docente).some((valor) => {
+          // Manejar valores que pueden ser números o strings
+          const valorString = valor?.toString().toLowerCase() || "";
+          return valorString.includes(busqueda.toLowerCase());
+        })
       );
       setDocentesFiltrados(filtrados);
     }
@@ -87,9 +90,16 @@ export default function CrudDocentes() {
     setOrdenamiento({ campo, direccion: nuevaDireccion });
 
     const docentesOrdenados = [...docentesFiltrados].sort((a, b) => {
-      // Asegurarse de que los valores son strings antes de usar toLowerCase
-      const valorA = String(a[campo]).toLowerCase();
-      const valorB = String(b[campo]).toLowerCase();
+      let valorA = a[campo];
+      let valorB = b[campo];
+
+      // Manejar valores numéricos y strings
+      if (typeof valorA === "string") {
+        valorA = valorA.toLowerCase();
+      }
+      if (typeof valorB === "string") {
+        valorB = valorB.toLowerCase();
+      }
 
       if (nuevaDireccion === "asc") {
         return valorA < valorB ? -1 : valorA > valorB ? 1 : 0;
@@ -110,82 +120,170 @@ export default function CrudDocentes() {
   // Abrir modal para editar docente
   const abrirModalEditar = (docente) => {
     setDocenteEditando(docente);
+    console.log("Editando docente:", docente);
     setModalAbierto(true);
   };
 
-  // Guardar docente (agregar o editar) - VERSIÓN LOCAL
-  const guardarDocente = (datosDocente) => {
-    // Crear campos derivados para mostrar en la tabla
-    const docenteCompleto = {
-      ...datosDocente,
-      // Mapear campos del modal a campos de la tabla
-      nombre: datosDocente.nombreDocente,
-      apellido1: datosDocente.apellidoPaterno,
-      apellido2: datosDocente.apellidoMaterno,
-      email: datosDocente.correoElectronico,
-    };
-
-    if (docenteEditando) {
-      // Editar docente existente
-      const docentesActualizados = docentes.map((docente) =>
-        docente.id === docenteEditando.id
-          ? {
-              ...docenteCompleto,
-              id: docenteEditando.id,
-            }
-          : docente
-      );
-
-      setDocentes(docentesActualizados);
-      console.log(
-        "Docente editado:",
-        docentesActualizados.find((d) => d.id === docenteEditando.id)
-      );
-    } else {
-      // Agregar nuevo docente
-      const nuevoDocente = {
-        ...docenteCompleto,
-        id: (
-          Math.max(...docentes.map((d) => Number.parseInt(d.id))) + 1
-        ).toString(),
-      };
-
-      setDocentes([...docentes, nuevoDocente]);
-      console.log("Nuevo docente agregado:", nuevoDocente);
-    }
-
-    setModalAbierto(false);
-    setDocenteEditando(null);
-  };
-
-  /* CÓDIGO API COMENTADO
+  // Guardar docente (agregar o editar) - VERSIÓN API
   const guardarDocente = async (datosDocente) => {
     try {
+      setCargando(true);
       const token = localStorage.getItem("token");
-      console.log(datosDocente);
-      const response = await fetch(API_ENDPOINTS.CREAR_PROFESOR, {
-        method: "POST",
+
+      // Crear campos derivados para mostrar en la tabla
+      const docenteCompleto = {
+        ...datosDocente,
+        // Mapear campos del modal a campos de la tabla
+        nombre: datosDocente.nombreDocente,
+        apellido1: datosDocente.apellidoPaterno,
+        apellido2: datosDocente.apellidoMaterno,
+        email: datosDocente.correoElectronico,
+      };
+
+      console.log("Datos a guardar:", docenteCompleto);
+
+      let response;
+      let endpoint;
+      let method;
+
+      if (docenteEditando) {
+        // Editar docente existente
+        endpoint = `${API_ENDPOINTS.EDITAR_PROFESOR}${docenteEditando.id}`;
+        method = "PUT";
+      } else {
+        // Crear nuevo docente
+        endpoint = API_ENDPOINTS.CREAR_PROFESOR;
+        method = "POST";
+      }
+
+      console.log("Endpoint:", endpoint);
+
+      response = await fetch(endpoint, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(datosDocente),
+        body: JSON.stringify(docenteCompleto),
       });
+
       const result = await response.json();
-      console.log(result);
+      console.log("Respuesta del servidor:", result);
+
       if (!response.ok) {
-        alert(result.error || "Error al agregar el docente");
+        alert(
+          result.error ||
+            `Error al ${docenteEditando ? "actualizar" : "agregar"} el docente`
+        );
         return;
       }
+
+      // Actualizar la lista de docentes
       await obtenerDocentes();
       setModalAbierto(false);
       setDocenteEditando(null);
     } catch (error) {
-      console.error("Error al agregar docente:", error);
-      alert("Error de conexión al agregar docente");
+      console.error(
+        `Error al ${docenteEditando ? "actualizar" : "agregar"} docente:`,
+        error
+      );
+      alert(
+        `Error de conexión al ${
+          docenteEditando ? "actualizar" : "agregar"
+        } docente`
+      );
+
+      // Implementación local como fallback en caso de error
+      const docenteCompleto = {
+        ...datosDocente,
+        nombre: datosDocente.nombreDocente,
+        apellido1: datosDocente.apellidoPaterno,
+        apellido2: datosDocente.apellidoMaterno,
+        email: datosDocente.correoElectronico,
+      };
+
+      if (docenteEditando) {
+        // Editar docente existente localmente
+        const docentesActualizados = docentes.map((docente) =>
+          docente.id === docenteEditando.id
+            ? {
+                ...docenteCompleto,
+                id: docenteEditando.id,
+              }
+            : docente
+        );
+
+        setDocentes(docentesActualizados);
+        console.log(
+          "Docente editado localmente:",
+          docentesActualizados.find((d) => d.id === docenteEditando.id)
+        );
+      } else {
+        // Agregar nuevo docente localmente
+        const nuevoDocente = {
+          ...docenteCompleto,
+          id: (
+            Math.max(...docentes.map((d) => Number.parseInt(d.id))) + 1
+          ).toString(),
+        };
+
+        setDocentes([...docentes, nuevoDocente]);
+        console.log("Nuevo docente agregado localmente:", nuevoDocente);
+      }
+
+      setModalAbierto(false);
+      setDocenteEditando(null);
+    } finally {
+      setCargando(false);
     }
   };
-  */
+
+  // Eliminar docente
+  const eliminarDocente = async (id) => {
+    if (!window.confirm("¿Está seguro que desea eliminar este docente?")) {
+      return;
+    }
+
+    try {
+      setCargando(true);
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(`${API_ENDPOINTS.ELIMINAR_PROFESOR}${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.clear();
+          navigate("/login");
+          return;
+        }
+        throw new Error("Error al eliminar el docente");
+      }
+
+      // Actualizar la lista de docentes
+      await obtenerDocentes();
+      alert("Docente eliminado correctamente");
+    } catch (error) {
+      console.error("Error al eliminar docente:", error);
+      alert("Error al eliminar el docente");
+
+      // Eliminar localmente como fallback
+      const docentesActualizados = docentes.filter(
+        (docente) => docente.id !== id
+      );
+      setDocentes(docentesActualizados);
+      setDocentesFiltrados(
+        docentesFiltrados.filter((docente) => docente.id !== id)
+      );
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
     <div className="crud-container">
@@ -214,6 +312,7 @@ export default function CrudDocentes() {
             totalDocentes={docentes.length}
             docentesFiltrados={docentesFiltrados.length}
             mostrarFiltrados={busqueda.length > 0}
+            cargando={cargando}
           />
         </Paper>
 
@@ -224,7 +323,9 @@ export default function CrudDocentes() {
             ordenamiento={ordenamiento}
             ordenarPor={ordenarPor}
             abrirModalEditar={abrirModalEditar}
+            eliminarDocente={eliminarDocente}
             busqueda={busqueda}
+            cargando={cargando}
           />
         </Paper>
 
@@ -234,6 +335,7 @@ export default function CrudDocentes() {
           onClose={() => setModalAbierto(false)}
           docente={docenteEditando}
           onGuardar={guardarDocente}
+          cargando={cargando}
         />
 
         {/* Footer */}

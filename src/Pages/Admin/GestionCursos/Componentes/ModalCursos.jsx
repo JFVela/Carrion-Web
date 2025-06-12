@@ -48,7 +48,7 @@ export default function ModalCurso({ open, onClose, curso, onGuardar }) {
   useEffect(() => {
     if (curso) {
       setFormData({
-        nombreCurso: curso.nombreCurso || "",
+        nombreCurso: curso.nombre || "",
         nivel: curso.nivel || "",
         area: curso.area || "",
       });
