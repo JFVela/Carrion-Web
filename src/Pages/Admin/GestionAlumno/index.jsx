@@ -1,18 +1,19 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { Container, Typography, Box, Paper } from "@mui/material";
-import { Api, PeopleAlt } from "@mui/icons-material";
+import { PeopleAlt } from "@mui/icons-material";
 import TablaAlumnos from "./Componentes/TablaAlumnos";
 import BarraHerramientas from "./Componentes/BarraHerramientas";
 import ModalAlumno from "./Componentes/ModalAlumno";
-// import { alumnosIniciales } from "./alumnos"
-import { API_ENDPOINTS } from "../../../api/endpoints.js";
+import { alumnosIniciales } from "./alumnos";
+// import { API_ENDPOINTS } from "../../../api/endpoints.js";
 import "./Estilos/page.css";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function CrudAlumnos() {
   // Estados principales
   const navigate = useNavigate();
-
   const [alumnos, setAlumnos] = useState([]);
   const [alumnosFiltrados, setAlumnosFiltrados] = useState([]);
   const [busqueda, setBusqueda] = useState("");
@@ -23,7 +24,13 @@ export default function CrudAlumnos() {
     direccion: "asc",
   });
 
-  const obtenerAlumnos = async () => {
+  // Función para obtener alumnos (ahora usa datos locales)
+  const obtenerAlumnos = () => {
+    // Usar datos locales en lugar de la API
+    setAlumnos(alumnosIniciales);
+    setAlumnosFiltrados(alumnosIniciales);
+
+    /* CÓDIGO API COMENTADO
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(API_ENDPOINTS.OBTENER_ALUMNOS, {
@@ -36,22 +43,20 @@ export default function CrudAlumnos() {
       if (!response.ok) {
         if (response.status === 401) {
           console.log(response);
-
           // Token inválido o expirado
           localStorage.clear();
           navigate("/login");
         }
         throw new Error("Error en la respuesta del servidor");
       }
-
       const data = await response.json();
       console.log(data);
-
       setAlumnos(data);
       setAlumnosFiltrados(data);
     } catch (error) {
       console.error("Error al obtener los alumnos:", error);
     }
+    */
   };
 
   // Inicializar datos
@@ -65,8 +70,10 @@ export default function CrudAlumnos() {
       setAlumnosFiltrados(alumnos);
     } else {
       const filtrados = alumnos.filter((alumno) =>
-        Object.values(alumno).some((valor) =>
-          valor.toLowerCase().includes(busqueda.toLowerCase())
+        Object.values(alumno).some(
+          (valor) =>
+            typeof valor === "string" &&
+            valor.toLowerCase().includes(busqueda.toLowerCase())
         )
       );
       setAlumnosFiltrados(filtrados);
@@ -82,8 +89,9 @@ export default function CrudAlumnos() {
     setOrdenamiento({ campo, direccion: nuevaDireccion });
 
     const alumnosOrdenados = [...alumnosFiltrados].sort((a, b) => {
-      const valorA = a[campo].toLowerCase();
-      const valorB = b[campo].toLowerCase();
+      // Asegurarse de que los valores son strings antes de usar toLowerCase
+      const valorA = String(a[campo]).toLowerCase();
+      const valorB = String(b[campo]).toLowerCase();
 
       if (nuevaDireccion === "asc") {
         return valorA < valorB ? -1 : valorA > valorB ? 1 : 0;
@@ -106,34 +114,69 @@ export default function CrudAlumnos() {
     setAlumnoEditando(alumno);
     setModalAbierto(true);
   };
-  /**EDITAR HACER UN PATCH*/
-  // Guardar alumno (agregar o editar)
-  /*
+
+  // Guardar alumno (agregar o editar) - VERSIÓN LOCAL
   const guardarAlumno = (datosAlumno) => {
+    // Mapear nivel y grado a texto para mostrar en la tabla
+    const nivelesTexto = { 1: "Primaria", 2: "Secundaria" };
+    const gradosTexto = {
+      1: "1ro",
+      2: "2do",
+      3: "3ro",
+      4: "4to",
+      5: "5to",
+      6: "6to",
+    };
+    const sedesTexto = { 1: "Sede Carrión", 2: "Sede Británico" };
+
+    // Crear campos derivados para mostrar en la tabla
+    const gradoSeccion = `${gradosTexto[datosAlumno.grado]} ${
+      nivelesTexto[datosAlumno.nivelEstudio]
+    }`;
+    const sedeNombre = sedesTexto[datosAlumno.sede];
+
     if (alumnoEditando) {
       // Editar alumno existente
-      setAlumnos((prev) =>
-        prev.map((alumno) => (alumno.id === alumnoEditando.id ? { ...datosAlumno, id: alumnoEditando.id } : alumno)),
-      )
+      const alumnosActualizados = alumnos.map((alumno) =>
+        alumno.id === alumnoEditando.id
+          ? {
+              ...datosAlumno,
+              id: alumnoEditando.id,
+              gradoSeccion,
+              sedeNombre,
+            }
+          : alumno
+      );
+
+      setAlumnos(alumnosActualizados);
+      console.log(
+        "Alumno editado:",
+        alumnosActualizados.find((a) => a.id === alumnoEditando.id)
+      );
     } else {
       // Agregar nuevo alumno
       const nuevoAlumno = {
         ...datosAlumno,
-        id: (alumnos.length + 1).toString(),
-      }
-      setAlumnos((prev) => [...prev, nuevoAlumno])
+        id: (
+          Math.max(...alumnos.map((a) => Number.parseInt(a.id))) + 1
+        ).toString(),
+        gradoSeccion,
+        sedeNombre,
+      };
+
+      setAlumnos([...alumnos, nuevoAlumno]);
+      console.log("Nuevo alumno agregado:", nuevoAlumno);
     }
 
-    setModalAbierto(false)
-    setAlumnoEditando(null)
-  }
-*/
+    setModalAbierto(false);
+    setAlumnoEditando(null);
+  };
 
+  /* CÓDIGO API COMENTADO
   const guardarAlumno = async (datosAlumno) => {
     try {
-      const token = localStorage.getItem("token"); // Ajusta según dónde guardes el JWT
+      const token = localStorage.getItem("token");
       console.log(datosAlumno);
-
       const response = await fetch(API_ENDPOINTS.CREAR_ALUMNO, {
         method: "POST",
         headers: {
@@ -142,29 +185,21 @@ export default function CrudAlumnos() {
         },
         body: JSON.stringify(datosAlumno),
       });
-
       const result = await response.json();
       console.log(result);
-
       if (!response.ok) {
         alert(result.error || "Error al agregar el alumno");
         return;
       }
-
-    
       await obtenerAlumnos();
-
       setModalAbierto(false);
       setAlumnoEditando(null);
     } catch (error) {
       console.error("Error al agregar alumno:", error);
       alert("Error de conexión al agregar alumno");
     }
-
-};
-
-
-
+  };
+  */
 
   return (
     <div className="crud-container">
@@ -203,6 +238,7 @@ export default function CrudAlumnos() {
             ordenamiento={ordenamiento}
             ordenarPor={ordenarPor}
             abrirModalEditar={abrirModalEditar}
+            busqueda={busqueda}
           />
         </Paper>
 
