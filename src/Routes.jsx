@@ -18,6 +18,7 @@ import InicioAdmin from "./Pages/Admin/Inicio";
 import GestionAlumno from "./Pages/Admin/GestionAlumno";
 import GestionDocente from "./Pages/Admin/GestionDocente";
 import GestionCurso from "./Pages/Admin/GestionCursos";
+import GestionAcademica from "./Pages/Admin/GestionAcademica";
 
 function AppRoutes() {
   return (
@@ -43,6 +44,7 @@ function AppRoutes() {
         <Route path="gestion-alumnos" element={<GestionAlumno />} />
         <Route path="gestion-profesores" element={<GestionDocente />} />
         <Route path="gestion-cursos" element={<GestionCurso />} />
+        <Route path="gestion-academica" element={<GestionAcademica />} />
       </Route>
     </Routes>
   );

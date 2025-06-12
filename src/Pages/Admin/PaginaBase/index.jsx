@@ -13,8 +13,9 @@ import Navegador from "../../../Componentes/NavTabs.jsx";
 
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
-import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import Face4Icon from "@mui/icons-material/Face4";
+import SchoolIcon from "@mui/icons-material/School";
 
 const tabs = [
   {
@@ -40,6 +41,12 @@ const tabs = [
     value: "4",
     icon: <AutoStoriesIcon />,
     path: "/admin/gestion-cursos",
+  },
+  {
+    label: "Gestión Académica",
+    value: "5",
+    icon: <SchoolIcon />,
+    path: "/admin/gestion-academica",
   },
 ];
 
