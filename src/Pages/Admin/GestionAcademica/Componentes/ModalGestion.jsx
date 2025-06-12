@@ -165,24 +165,7 @@ export default function ModalAsignacionDocente({ open, onClose, asignacion, onGu
 
     if (validarFormulario()) {
       try {
-        // ===== VALIDACIONES ADICIONALES CON API =====
-        // const disponibilidad = await validarDisponibilidadAsignacion(formData);
-        // if (!disponibilidad.esValido) {
-        //   setErrores({ general: disponibilidad.mensaje });
-        //   return;
-        // }
-
-        // const conflictos = await verificarConflictosHorario(
-        //   formData.docenteId,
-        //   formData.salon,
-        //   formData.sede
-        // );
-        // if (conflictos.hayConflictos) {
-        //   setErrores({ general: 'Existe un conflicto de horario con esta asignación' });
-        //   return;
-        // }
-
-        // Si todas las validaciones pasan, guardar
+       
         onGuardar(formData)
       } catch (error) {
         console.error("Error al procesar asignación:", error)
