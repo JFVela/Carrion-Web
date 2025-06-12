@@ -24,6 +24,70 @@ export default function CrudAlumnos() {
     direccion: "asc",
   });
 
+  // ==================== FUNCIONES API (COMENTADAS) ====================
+
+  // Función para crear un nuevo alumno
+  // const crearAlumno = async (datosAlumno) => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const response = await fetch(API_ENDPOINTS.CREAR_ALUMNO, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify(datosAlumno),
+  //     });
+  //
+  //     if (!response.ok) {
+  //       if (response.status === 401) {
+  //         localStorage.clear();
+  //         navigate("/login");
+  //         return null;
+  //       }
+  //       throw new Error("Error al crear el alumno");
+  //     }
+  //
+  //     const result = await response.json();
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Error al crear alumno:", error);
+  //     throw error;
+  //   }
+  // };
+
+  // Función para actualizar un alumno existente
+  // const actualizarAlumno = async (id, datosAlumno) => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const response = await fetch(`${API_ENDPOINTS.ACTUALIZAR_ALUMNO}/${id}`, {
+  //       method: "PUT", // o "PATCH" según tu API
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify(datosAlumno),
+  //     });
+  //
+  //     if (!response.ok) {
+  //       if (response.status === 401) {
+  //         localStorage.clear();
+  //         navigate("/login");
+  //         return null;
+  //       }
+  //       throw new Error("Error al actualizar el alumno");
+  //     }
+  //
+  //     const result = await response.json();
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Error al actualizar alumno:", error);
+  //     throw error;
+  //   }
+  // };
+
+  // ==================== FIN FUNCIONES API ====================
+
   // Función para obtener alumnos (ahora usa datos locales)
   const obtenerAlumnos = () => {
     // Usar datos locales en lugar de la API
@@ -115,91 +179,90 @@ export default function CrudAlumnos() {
     setModalAbierto(true);
   };
 
-  // Guardar alumno (agregar o editar) - VERSIÓN LOCAL
-  const guardarAlumno = (datosAlumno) => {
-    // Mapear nivel y grado a texto para mostrar en la tabla
-    const nivelesTexto = { 1: "Primaria", 2: "Secundaria" };
-    const gradosTexto = {
-      1: "1ro",
-      2: "2do",
-      3: "3ro",
-      4: "4to",
-      5: "5to",
-      6: "6to",
-    };
-    const sedesTexto = { 1: "Sede Carrión", 2: "Sede Británico" };
-
-    // Crear campos derivados para mostrar en la tabla
-    const gradoSeccion = `${gradosTexto[datosAlumno.grado]} ${
-      nivelesTexto[datosAlumno.nivelEstudio]
-    }`;
-    const sedeNombre = sedesTexto[datosAlumno.sede];
-
-    if (alumnoEditando) {
-      // Editar alumno existente
-      const alumnosActualizados = alumnos.map((alumno) =>
-        alumno.id === alumnoEditando.id
-          ? {
-              ...datosAlumno,
-              id: alumnoEditando.id,
-              gradoSeccion,
-              sedeNombre,
-            }
-          : alumno
-      );
-
-      setAlumnos(alumnosActualizados);
-      console.log(
-        "Alumno editado:",
-        alumnosActualizados.find((a) => a.id === alumnoEditando.id)
-      );
-    } else {
-      // Agregar nuevo alumno
-      const nuevoAlumno = {
-        ...datosAlumno,
-        id: (
-          Math.max(...alumnos.map((a) => Number.parseInt(a.id))) + 1
-        ).toString(),
-        gradoSeccion,
-        sedeNombre,
-      };
-
-      setAlumnos([...alumnos, nuevoAlumno]);
-      console.log("Nuevo alumno agregado:", nuevoAlumno);
-    }
-
-    setModalAbierto(false);
-    setAlumnoEditando(null);
-  };
-
-  /* CÓDIGO API COMENTADO
+  // Guardar alumno (agregar o editar) - VERSIÓN HÍBRIDA (LOCAL + API COMENTADA)
   const guardarAlumno = async (datosAlumno) => {
     try {
-      const token = localStorage.getItem("token");
-      console.log(datosAlumno);
-      const response = await fetch(API_ENDPOINTS.CREAR_ALUMNO, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(datosAlumno),
-      });
-      const result = await response.json();
-      console.log(result);
-      if (!response.ok) {
-        alert(result.error || "Error al agregar el alumno");
-        return;
+      // Mapear nivel y grado a texto para mostrar en la tabla
+      const nivelesTexto = { 1: "Primaria", 2: "Secundaria" };
+      const gradosTexto = {
+        1: "1ro",
+        2: "2do",
+        3: "3ro",
+        4: "4to",
+        5: "5to",
+        6: "6to",
+      };
+      const sedesTexto = { 1: "Sede Carrión", 2: "Sede Británico" };
+
+      // Crear campos derivados para mostrar en la tabla
+      const gradoSeccion = `${gradosTexto[datosAlumno.grado]} ${
+        nivelesTexto[datosAlumno.nivelEstudio]
+      }`;
+      const sedeNombre = sedesTexto[datosAlumno.sede];
+
+      if (alumnoEditando) {
+        // ===== ACTUALIZAR ALUMNO EXISTENTE =====
+
+        // USAR API PARA ACTUALIZAR (COMENTADO)
+        // const alumnoActualizado = await actualizarAlumno(alumnoEditando.id, datosAlumno);
+        // if (!alumnoActualizado) {
+        //   alert("Error al actualizar el alumno");
+        //   return;
+        // }
+        // console.log("Alumno actualizado via API:", alumnoActualizado);
+
+        // VERSIÓN LOCAL (TEMPORAL)
+        const alumnosActualizados = alumnos.map((alumno) =>
+          alumno.id === alumnoEditando.id
+            ? {
+                ...datosAlumno,
+                id: alumnoEditando.id,
+                gradoSeccion,
+                sedeNombre,
+              }
+            : alumno
+        );
+
+        setAlumnos(alumnosActualizados);
+        console.log(
+          "Alumno editado localmente:",
+          alumnosActualizados.find((a) => a.id === alumnoEditando.id)
+        );
+      } else {
+        // ===== CREAR NUEVO ALUMNO =====
+
+        // USAR API PARA CREAR (COMENTADO)
+        // const nuevoAlumnoAPI = await crearAlumno(datosAlumno);
+        // if (!nuevoAlumnoAPI) {
+        //   alert("Error al crear el alumno");
+        //   return;
+        // }
+        // console.log("Nuevo alumno creado via API:", nuevoAlumnoAPI);
+
+        // VERSIÓN LOCAL (TEMPORAL)
+        const nuevoAlumno = {
+          ...datosAlumno,
+          id: (
+            Math.max(...alumnos.map((a) => Number.parseInt(a.id))) + 1
+          ).toString(),
+          gradoSeccion,
+          sedeNombre,
+        };
+
+        setAlumnos([...alumnos, nuevoAlumno]);
+        console.log("Nuevo alumno agregado localmente:", nuevoAlumno);
       }
-      await obtenerAlumnos();
+
+      // REFRESCAR DATOS DESDE LA API (COMENTADO)
+      // await obtenerAlumnos();
+
       setModalAbierto(false);
       setAlumnoEditando(null);
     } catch (error) {
-      console.error("Error al agregar alumno:", error);
-      alert("Error de conexión al agregar alumno");
+      console.error("Error al guardar alumno:", error);
+      alert("Error al guardar el alumno. Por favor, intente nuevamente.");
     }
   };
-  */
 
   return (
     <div className="crud-container">
