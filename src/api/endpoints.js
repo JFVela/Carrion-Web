@@ -16,4 +16,9 @@ export const API_ENDPOINTS = {
   CREAR_CURSO:`${BASE_URL}/Admin/crudCursos/agregarCurso.php`,
   EDITAR_CURSO:`${BASE_URL}/Admin/crudCursos/editarCurso.php?id=`,
 
+  OBTENER_ASIGNACIONES:`${BASE_URL}/Admin/crudAsignaciones/listarAsignaciones.php`,
+  CREAR_ASIGNACION:`${BASE_URL}/Admin/crudAsignaciones/agregarAsignaciones.php`,
+  EDITAR_ASIGNACION:`${BASE_URL}/Admin/crudAsignaciones/editarAsignaciones.php`,
+
+
 };

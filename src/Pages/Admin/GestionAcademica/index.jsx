@@ -1,215 +1,16 @@
 "use client"
-import { useState, useMemo } from "react"
+
+import { useState, useMemo, useEffect } from "react"
 import { Container, Typography } from "@mui/material"
 import TablaGestionAcademica from "./Componentes/TablaGestion"
 import BarraHerramientasGestion from "./Componentes/BarraHerramientas"
 import ModalAsignacionDocente from "./Componentes/ModalGestion"
 import { CURSOS_NIVEL, SEDES, SALONES } from "./configuracion"
-
-// ==================== FUNCIONES API (COMENTADAS) ====================
-// Estas funciones serán implementadas cuando se conecte con el backend
-
-// Función para obtener todas las asignaciones
-// const obtenerAsignaciones = async () => {
-//   try {
-//     const response = await fetch('/api/asignaciones', {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al obtener asignaciones');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// Función para crear una nueva asignación
-// const crearAsignacion = async (datosAsignacion) => {
-//   try {
-//     const response = await fetch('/api/asignaciones', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify(datosAsignacion),
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al crear asignación');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// Función para actualizar una asignación existente
-// const actualizarAsignacion = async (id, datosAsignacion) => {
-//   try {
-//     const response = await fetch(`/api/asignaciones/${id}`, {
-//       method: 'PUT',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify(datosAsignacion),
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al actualizar asignación');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// Función para eliminar una asignación
-// const eliminarAsignacionAPI = async (id) => {
-//   try {
-//     const response = await fetch(`/api/asignaciones/${id}`, {
-//       method: 'DELETE',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al eliminar asignación');
-//     }
-//     return true;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// Función para obtener lista de docentes
-// const obtenerDocentes = async () => {
-//   try {
-//     const response = await fetch('/api/docentes', {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al obtener docentes');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// Función para obtener cursos disponibles
-// const obtenerCursos = async () => {
-//   try {
-//     const response = await fetch('/api/cursos', {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al obtener cursos');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// Función para obtener sedes disponibles
-// const obtenerSedes = async () => {
-//   try {
-//     const response = await fetch('/api/sedes', {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al obtener sedes');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// Función para obtener salones disponibles
-// const obtenerSalones = async () => {
-//   try {
-//     const response = await fetch('/api/salones', {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al obtener salones');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// ==================== FIN FUNCIONES API ====================
+import { API_ENDPOINTS } from "../../../api/endpoints.js"
+import { useNavigate } from "react-router-dom"
 
 export default function GestionAcademicaPage() {
-  // Datos de ejemplo de asignaciones
-  const [asignaciones, setAsignaciones] = useState([
-    {
-      id: 1,
-      docenteId: 1,
-      docenteNombre: "Juan Figueroa",
-      cursoNivel: "aritmetica_secundaria",
-      cursoNombre: "Aritmética Secundaria",
-      sede: "carrion",
-      sedeNombre: "Carrión",
-      salon: "1ro_secundaria",
-      salonNombre: "1ro Secundaria",
-    },
-    {
-      id: 2,
-      docenteId: 2,
-      docenteNombre: "María González",
-      cursoNivel: "algebra_secundaria",
-      cursoNombre: "Álgebra Secundaria",
-      sede: "bitanico",
-      sedeNombre: "Bitánico",
-      salon: "2do_secundaria",
-      salonNombre: "2do Secundaria",
-    },
-    {
-      id: 3,
-      docenteId: 3,
-      docenteNombre: "Carlos Rodríguez",
-      cursoNivel: "geometria_primaria",
-      cursoNombre: "Geometría Primaria",
-      sede: "carrion",
-      sedeNombre: "Carrión",
-      salon: "3ro_secundaria",
-      salonNombre: "3ro Secundaria",
-    },
-  ])
-
+  const [asignaciones, setAsignaciones] = useState([])
   const [busqueda, setBusqueda] = useState("")
   const [modalAbierto, setModalAbierto] = useState(false)
   const [asignacionEditando, setAsignacionEditando] = useState(null)
@@ -218,21 +19,55 @@ export default function GestionAcademicaPage() {
     direccion: "asc",
   })
 
-  // Filtrar asignaciones según la búsqueda
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      navigate("/login")
+    } else {
+      obtenerAsignaciones(token)
+    }
+  }, [])
+
+  const obtenerAsignaciones = async (token) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.OBTENER_ASIGNACIONES, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.clear()
+          navigate("/login")
+        }
+        throw new Error("Error en la respuesta del servidor")
+      }
+
+      const data = await response.json()
+      setAsignaciones(data)
+    } catch (error) {
+      console.error("Error al obtener las asignaciones:", error)
+    }
+  }
+
   const asignacionesFiltradas = useMemo(() => {
     if (!busqueda.trim()) return asignaciones
 
     const busquedaLower = busqueda.toLowerCase()
     return asignaciones.filter(
       (asignacion) =>
-        asignacion.docenteNombre.toLowerCase().includes(busquedaLower) ||
-        asignacion.cursoNombre.toLowerCase().includes(busquedaLower) ||
-        asignacion.sedeNombre.toLowerCase().includes(busquedaLower) ||
-        asignacion.salonNombre.toLowerCase().includes(busquedaLower),
+        asignacion.docenteNombre?.toLowerCase().includes(busquedaLower) ||
+        asignacion.cursoNombre?.toLowerCase().includes(busquedaLower) ||
+        asignacion.sedeNombre?.toLowerCase().includes(busquedaLower) ||
+        asignacion.salonNombre?.toLowerCase().includes(busquedaLower)
     )
   }, [asignaciones, busqueda])
 
-  // Ordenar asignaciones
   const asignacionesOrdenadas = useMemo(() => {
     return [...asignacionesFiltradas].sort((a, b) => {
       if (a[ordenamiento.campo] < b[ordenamiento.campo]) {
@@ -246,9 +81,9 @@ export default function GestionAcademicaPage() {
   }, [asignacionesFiltradas, ordenamiento])
 
   const ordenarPor = (campo) => {
-    setOrdenamiento((prevOrdenamiento) => ({
+    setOrdenamiento((prev) => ({
       campo,
-      direccion: prevOrdenamiento.campo === campo && prevOrdenamiento.direccion === "asc" ? "desc" : "asc",
+      direccion: prev.campo === campo && prev.direccion === "asc" ? "desc" : "asc",
     }))
   }
 
@@ -265,26 +100,20 @@ export default function GestionAcademicaPage() {
   const eliminarAsignacion = async (id) => {
     if (window.confirm("¿Está seguro de eliminar esta asignación?")) {
       try {
-        // ===== USAR API PARA ELIMINAR =====
         // await eliminarAsignacionAPI(id);
-
-        // Eliminar de estado local (TEMPORAL)
         setAsignaciones(asignaciones.filter((asignacion) => asignacion.id !== id))
       } catch (error) {
         console.error("Error al eliminar asignación:", error)
-        // alert('Error al eliminar la asignación. Por favor, intente nuevamente.');
       }
     }
   }
 
   const manejarGuardar = async (datosAsignacion) => {
     try {
-      // Obtener los nombres correspondientes a los valores
       const cursoNombre = CURSOS_NIVEL[datosAsignacion.cursoNivel] || "Curso Desconocido"
       const sedeNombre = SEDES[datosAsignacion.sede] || "Sede Desconocida"
       const salonNombre = SALONES[datosAsignacion.salon] || "Salón Desconocido"
 
-      // Obtener el nombre del docente (en un caso real esto vendría de una base de datos)
       const docentes = [
         { id: 1, nombreCompleto: "Juan Figueroa" },
         { id: 2, nombreCompleto: "María González" },
@@ -292,20 +121,11 @@ export default function GestionAcademicaPage() {
         { id: 4, nombreCompleto: "Ana Martínez" },
         { id: 5, nombreCompleto: "Luis Hernández" },
       ]
+
       const docente = docentes.find((d) => d.id === datosAsignacion.docenteId)
       const docenteNombre = docente ? docente.nombreCompleto : "Docente Desconocido"
 
       if (asignacionEditando) {
-        // ===== USAR API PARA ACTUALIZAR =====
-        // const asignacionActualizada = await actualizarAsignacion(asignacionEditando.id, {
-        //   ...datosAsignacion,
-        //   cursoNombre,
-        //   sedeNombre,
-        //   salonNombre,
-        //   docenteNombre,
-        // });
-
-        // Editar asignación existente (TEMPORAL - usando estado local)
         setAsignaciones(
           asignaciones.map((asignacion) =>
             asignacion.id === asignacionEditando.id
@@ -317,20 +137,13 @@ export default function GestionAcademicaPage() {
                   salonNombre,
                   docenteNombre,
                 }
-              : asignacion,
-          ),
+              : asignacion
+          )
         )
       } else {
-        // ===== USAR API PARA CREAR =====
-        // const nuevaAsignacion = await crearAsignacion({
-        //   ...datosAsignacion,
-        //   cursoNombre,
-        //   sedeNombre,
-        //   salonNombre,
-        //   docenteNombre,
-        // });
 
-        // Agregar nueva asignación (TEMPORAL - usando estado local)
+
+        /*
         const nuevaAsignacion = {
           id: Date.now(),
           ...datosAsignacion,
@@ -339,13 +152,41 @@ export default function GestionAcademicaPage() {
           salonNombre,
           docenteNombre,
         }
-        setAsignaciones([...asignaciones, nuevaAsignacion])
+      console.log(nuevaAsignacion);
+
+        setAsignaciones([...asignaciones, nuevaAsignacion])*/
+
+const token = localStorage.getItem("token")
+
+const respuesta = await fetch(API_ENDPOINTS.CREAR_ASIGNACION, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify({
+    cursoNombre: datosAsignacion.cursoNivel,
+    salonNombre: datosAsignacion.salon,
+    sedeNombre: datosAsignacion.sede,
+    docenteId: datosAsignacion.docenteId,
+  }),
+})
+
+if (!respuesta.ok) {
+  const error = await respuesta.json()
+  throw new Error(error.message || "Error al guardar la asignación")
+}
+
+// ✅ Actualizar desde la BD luego de insertar
+await obtenerAsignaciones(token)
+
       }
+
+      
+
       setModalAbierto(false)
     } catch (error) {
       console.error("Error al guardar asignación:", error)
-      // Aquí podrías mostrar un mensaje de error al usuario
-      // alert('Error al guardar la asignación. Por favor, intente nuevamente.');
     }
   }
 

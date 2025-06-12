@@ -24,71 +24,7 @@ import {
 } from "@mui/material"
 import "../Estilos/modal.css"
 
-// ==================== FUNCIONES API PARA MODAL (COMENTADAS) ====================
 
-// Función para obtener docentes disponibles para el modal
-// const obtenerDocentesDisponibles = async () => {
-//   try {
-//     const response = await fetch('/api/docentes/disponibles', {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al obtener docentes disponibles');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// Función para validar disponibilidad de asignación
-// const validarDisponibilidadAsignacion = async (datosAsignacion) => {
-//   try {
-//     const response = await fetch('/api/asignaciones/validar-disponibilidad', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify(datosAsignacion),
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al validar disponibilidad');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// Función para obtener conflictos de horario
-// const verificarConflictosHorario = async (docenteId, salon, sede) => {
-//   try {
-//     const response = await fetch('/api/asignaciones/verificar-conflictos', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({ docenteId, salon, sede }),
-//     });
-//     if (!response.ok) {
-//       throw new Error('Error al verificar conflictos');
-//     }
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error:', error);
-//     throw error;
-//   }
-// };
-
-// ==================== FIN FUNCIONES API MODAL ====================
 
 export default function ModalAsignacionDocente({ open, onClose, asignacion, onGuardar }) {
   // Datos locales de docentes
