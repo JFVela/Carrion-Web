@@ -14,6 +14,6 @@ export const API_ENDPOINTS = {
   EDITAR_PROFESOR:`${BASE_URL}/Admin/crudProfes/editarProfesor.php`,
   OBTENER_CURSOS:`${BASE_URL}/Admin/crudCursos/listarCursos.php`,
   CREAR_CURSO:`${BASE_URL}/Admin/crudCursos/agregarCurso.php`,
-  EDITAR_CURSO:`${BASE_URL}/Admin/crudCursos/editarCurso.php`,
+  EDITAR_CURSO:`${BASE_URL}/Admin/crudCursos/editarCurso.php?id=`,
 
 };

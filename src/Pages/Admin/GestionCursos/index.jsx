@@ -110,6 +110,8 @@ export default function CrudCursos() {
   // Abrir modal para editar curso
   const abrirModalEditar = (curso) => {
     setCursoEditando(curso)
+    console.log(curso);
+    
     setModalAbierto(true)
   }
 
@@ -125,7 +127,7 @@ export default function CrudCursos() {
 
       if (cursoEditando) {
         // Editar curso existente
-        endpoint = `${API_ENDPOINTS.ACTUALIZAR_CURSO}/${cursoEditando.id}`
+        endpoint = `${API_ENDPOINTS.ACTUALIZAR_CURSO}${cursoEditando.id}`
         method = "PUT"
       } else {
         // Crear nuevo curso
