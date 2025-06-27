@@ -9,14 +9,14 @@ function TomarAsistencia() {
 
   useEffect(() => {
     // 1) Cargo lista de alumnos
-    fetch("http://localhost:3000/listarAlumnos.php")
+    fetch("http://localhost:9999/listarAlumnos.php")
       .then((res) => res.json())
       .then((data) => setAlumnos(data));
   }, []);
 
   useEffect(() => {
     if (alumnos.length === 0) return;
-    fetch("http://localhost:3000/listarAsistenciaHoy.php")
+    fetch("http://localhost:9999/listarAsistenciaHoy.php")
       .then((res) => res.json())
       .then((data) => {
         const inicial = alumnos.map((al) => ({
@@ -48,7 +48,7 @@ function TomarAsistencia() {
     console.log("Payload a enviar:", payload);
 
     // 2) Envío al backend
-    fetch("http://localhost:3000/guardarAsistencia.php", {
+    fetch("http://localhost:9999/guardarAsistencia.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

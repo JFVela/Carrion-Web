@@ -6,6 +6,8 @@ import {
   AppBar,
   useTheme,
   useMediaQuery,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import { TabContext } from "@mui/lab";
 import { useState, useEffect } from "react";
@@ -16,6 +18,7 @@ import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import Face4Icon from "@mui/icons-material/Face4";
 import SchoolIcon from "@mui/icons-material/School";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const tabs = [
   {
@@ -69,6 +72,11 @@ function PaginaBase() {
     if (selectedTab) navigate(selectedTab.path);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
   return (
     <Box
       sx={{
@@ -96,6 +104,15 @@ function PaginaBase() {
             onChange={handleChange}
             isMobile={isMobile}
           />
+
+          {/* Botón de cerrar sesión */}
+          <Box sx={{ position: "absolute", right: 16, top: 8 }}>
+            <Tooltip title="Cerrar sesión">
+              <IconButton onClick={handleLogout} color="inherit">
+                <LogoutIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </AppBar>
 
         <Container
