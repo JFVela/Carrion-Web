@@ -24,6 +24,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
     nivelEstudio: "",
     grado: "",
     sede: "",
+    correo: "",
   });
 
   const [errores, setErrores] = useState({});
@@ -79,6 +80,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
         nivelEstudio: alumno.nivelEstudio || "",
         grado: alumno.grado || "",
         sede: alumno.sede || "",
+        correo: alumno.correo || "", // <--- nuevo campo
       });
     } else {
       // Resetear el formulario si es un nuevo alumno
@@ -90,6 +92,7 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
         nivelEstudio: "",
         grado: "",
         sede: "",
+        correo: "", // <--- nuevo campo
       });
     }
     setErrores({});
@@ -144,7 +147,16 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
       "nivelEstudio",
       "grado",
       "sede",
+      "correo", // Agregar correo a los campos requeridos
     ];
+
+    if (!formData.correo || formData.correo.trim() === "") {
+      nuevosErrores.correo = "El correo es obligatorio";
+      esValido = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.correo)) {
+      nuevosErrores.correo = "Correo no válido";
+      esValido = false;
+    }
 
     camposRequeridos.forEach((campo) => {
       if (!formData[campo] || formData[campo].toString().trim() === "") {
@@ -259,6 +271,21 @@ export default function ModalAlumno({ open, onClose, alumno, onGuardar }) {
                       required
                       error={!!errores.apellido2}
                       helperText={errores.apellido2}
+                      fullWidth
+                      variant="outlined"
+                      margin="dense"
+                      className="campo-formulario"
+                    />
+                  </div>
+                  <div className="campo-completo">
+                    <TextField
+                      name="correo"
+                      label="Correo Electrónico"
+                      value={formData.correo}
+                      onChange={manejarCambio}
+                      required
+                      error={!!errores.correo}
+                      helperText={errores.correo}
                       fullWidth
                       variant="outlined"
                       margin="dense"

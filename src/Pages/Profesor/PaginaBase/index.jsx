@@ -36,6 +36,12 @@ const tabs = [
     icon: <GradeIcon />,
     path: "/profesor/colocar-notas",
   },
+  {
+    label: "Mensajería",
+    value: "4",
+    icon: <AssignmentTurnedInIcon />,
+    path: "/profesor/mensajeria",
+  }
 ];
 
 function PaginaBaseprofesor() {

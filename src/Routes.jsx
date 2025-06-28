@@ -13,6 +13,7 @@ import PaginaProfe from "./Pages/Profesor/Inicio";
 import InicioProfe from "./Pages/Profesor/PaginaBase";
 import TomarAsistencia from "./Pages/Profesor/TomarAsistencia";
 import ColocarNotas from "./Pages/Profesor/ColocarNotas";
+import MensajeriaDocenteAlumno from "./Pages/Profesor/Mensajeria";
 
 //Paginas de administración
 import PaginaAdmin from "./Pages/Admin/PaginaBase";
@@ -21,7 +22,6 @@ import GestionAlumno from "./Pages/Admin/GestionAlumno";
 import GestionDocente from "./Pages/Admin/GestionDocente";
 import GestionCurso from "./Pages/Admin/GestionCursos";
 import GestionAcademica from "./Pages/Admin/GestionAcademica";
-import Mensajeria from "./Pages/Admin/Mensajeria";
 
 function AppRoutes() {
   return (
@@ -42,6 +42,7 @@ function AppRoutes() {
         <Route index element={<PaginaProfe />} />
         <Route path="tomar-asistencia" element={<TomarAsistencia />} />
         <Route path="colocar-notas" element={<ColocarNotas />} />
+        <Route path="mensajeria" element={<MensajeriaDocenteAlumno />} />
       </Route>
 
       <Route path="/admin" element={<PaginaAdmin />}>
@@ -50,7 +51,6 @@ function AppRoutes() {
         <Route path="gestion-profesores" element={<GestionDocente />} />
         <Route path="gestion-cursos" element={<GestionCurso />} />
         <Route path="gestion-academica" element={<GestionAcademica />} />
-        <Route path="mensajeria" element={<Mensajeria />} />
       </Route>
     </Routes>
   );

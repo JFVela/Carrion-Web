@@ -31,4 +31,7 @@ export const API_ENDPOINTS = {
   MODIFICAR_ASISTENCIA: `${BASE_URL}/Docente/crudAsistencia/modificarAsistencia.php`,
   SEDES_ASISTENCIA: `${BASE_URL}/Docente/crudAsistencia/obtenerSedes.php`,
 
+  //API PARA NOTIFICACIONES
+  OBTENER_NOTIFICACIONES: `${BASE_URL}/Docente/crudNotificar/listarNotificacion.php`,
+  CREAR_NOTIFICACION: `${BASE_URL}/Docente/PHPMailer/enviarCorreo.php`,
 };

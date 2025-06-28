@@ -1,128 +1,129 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { Container, Typography, Box, Paper } from "@mui/material"
-import { PeopleAlt } from "@mui/icons-material"
-import TablaAlumnos from "./Componentes/TablaAlumnos"
-import BarraHerramientas from "./Componentes/BarraHerramientas"
-import ModalAlumno from "./Componentes/ModalAlumno"
-import { API_ENDPOINTS } from "../../../api/endpoints.js"
-import "./Estilos/page.css"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react";
+import { Container, Typography, Box, Paper } from "@mui/material";
+import { PeopleAlt } from "@mui/icons-material";
+import TablaAlumnos from "./Componentes/TablaAlumnos";
+import BarraHerramientas from "./Componentes/BarraHerramientas";
+import ModalAlumno from "./Componentes/ModalAlumno";
+import { API_ENDPOINTS } from "../../../api/endpoints.js";
+import "./Estilos/page.css";
+import { useNavigate } from "react-router-dom";
 
 export default function CrudAlumnos() {
   // Estados principales
-  const navigate = useNavigate()
-  const [alumnos, setAlumnos] = useState([])
-  const [alumnosFiltrados, setAlumnosFiltrados] = useState([])
-  const [busqueda, setBusqueda] = useState("")
-  const [modalAbierto, setModalAbierto] = useState(false)
-  const [alumnoEditando, setAlumnoEditando] = useState(null)
+  const navigate = useNavigate();
+  const [alumnos, setAlumnos] = useState([]);
+  const [alumnosFiltrados, setAlumnosFiltrados] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [alumnoEditando, setAlumnoEditando] = useState(null);
   const [ordenamiento, setOrdenamiento] = useState({
     campo: "id",
     direccion: "asc",
-  })
+  });
 
   // Función para obtener alumnos desde la API
   const obtenerAlumnos = async () => {
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       const response = await fetch(API_ENDPOINTS.OBTENER_ALUMNOS, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      })
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
-          console.log(response)
+          console.log(response);
           // Token inválido o expirado
-          localStorage.clear()
-          navigate("/login")
+          localStorage.clear();
+          navigate("/login");
         }
-        throw new Error("Error en la respuesta del servidor")
+        throw new Error("Error en la respuesta del servidor");
       }
 
-      const data = await response.json()
-      console.log(data)
-      setAlumnos(data)
-      setAlumnosFiltrados(data)
+      const data = await response.json();
+      console.log(data);
+      setAlumnos(data);
+      setAlumnosFiltrados(data);
     } catch (error) {
-      console.error("Error al obtener los alumnos:", error)
+      console.error("Error al obtener los alumnos:", error);
     }
-  }
+  };
 
   // Inicializar datos
   useEffect(() => {
-    obtenerAlumnos()
-  }, [])
+    obtenerAlumnos();
+  }, []);
 
   // Función de búsqueda dinámica
   useEffect(() => {
     if (!busqueda.trim()) {
-      setAlumnosFiltrados(alumnos)
+      setAlumnosFiltrados(alumnos);
     } else {
       const filtrados = alumnos.filter((alumno) =>
         Object.values(alumno).some((valor) => {
           // Manejar valores que pueden ser números o strings
-          const valorString = valor?.toString().toLowerCase() || ""
-          return valorString.includes(busqueda.toLowerCase())
-        }),
-      )
-      setAlumnosFiltrados(filtrados)
+          const valorString = valor?.toString().toLowerCase() || "";
+          return valorString.includes(busqueda.toLowerCase());
+        })
+      );
+      setAlumnosFiltrados(filtrados);
     }
-  }, [busqueda, alumnos])
+  }, [busqueda, alumnos]);
 
   // Función de ordenamiento
   const ordenarPor = (campo) => {
-    const nuevaDireccion = ordenamiento.campo === campo && ordenamiento.direccion === "asc" ? "desc" : "asc"
-    setOrdenamiento({ campo, direccion: nuevaDireccion })
+    const nuevaDireccion =
+      ordenamiento.campo === campo && ordenamiento.direccion === "asc"
+        ? "desc"
+        : "asc";
+    setOrdenamiento({ campo, direccion: nuevaDireccion });
 
     const alumnosOrdenados = [...alumnosFiltrados].sort((a, b) => {
-      let valorA = a[campo]
-      let valorB = b[campo]
+      let valorA = a[campo];
+      let valorB = b[campo];
 
       // Manejar valores numéricos y strings
       if (typeof valorA === "string") {
-        valorA = valorA.toLowerCase()
+        valorA = valorA.toLowerCase();
       }
       if (typeof valorB === "string") {
-        valorB = valorB.toLowerCase()
+        valorB = valorB.toLowerCase();
       }
 
       if (nuevaDireccion === "asc") {
-        return valorA < valorB ? -1 : valorA > valorB ? 1 : 0
+        return valorA < valorB ? -1 : valorA > valorB ? 1 : 0;
       } else {
-        return valorA > valorB ? -1 : valorA < valorB ? 1 : 0
+        return valorA > valorB ? -1 : valorA < valorB ? 1 : 0;
       }
-    })
+    });
 
-    setAlumnosFiltrados(alumnosOrdenados)
-  }
+    setAlumnosFiltrados(alumnosOrdenados);
+  };
 
   // Abrir modal para agregar alumno
   const abrirModalAgregar = () => {
-    setAlumnoEditando(null)
-    setModalAbierto(true)
-  }
+    setAlumnoEditando(null);
+    setModalAbierto(true);
+  };
 
   // Abrir modal para editar alumno
   const abrirModalEditar = (alumno) => {
-    setAlumnoEditando(alumno)
-    console.log(alumno)
-    setModalAbierto(true)
-  }
+    setAlumnoEditando(alumno);
+    console.log(alumno);
+    setModalAbierto(true);
+  };
 
   // Guardar alumno (agregar o editar)
   const guardarAlumno = async (datosAlumno) => {
     try {
-      const token = localStorage.getItem("token")
-      console.log(datosAlumno)
+      const token = localStorage.getItem("token");
+      console.log(datosAlumno);
 
       // Mapear nivel y grado a texto para mostrar en la tabla
-      const nivelesTexto = { 1: "Primaria", 2: "Secundaria" }
+      const nivelesTexto = { 1: "Primaria", 2: "Secundaria" };
       const gradosTexto = {
         1: "1ro",
         2: "2do",
@@ -130,35 +131,37 @@ export default function CrudAlumnos() {
         4: "4to",
         5: "5to",
         6: "6to",
-      }
-      const sedesTexto = { 1: "Sede Carrión", 2: "Sede Británico" }
+      };
+      const sedesTexto = { 1: "Sede Carrión", 2: "Sede Británico" };
 
       // Crear campos derivados para mostrar en la tabla
-      const gradoSeccion = `${gradosTexto[datosAlumno.grado]} ${nivelesTexto[datosAlumno.nivelEstudio]}`
-      const sedeNombre = sedesTexto[datosAlumno.sede]
+      const gradoSeccion = `${gradosTexto[datosAlumno.grado]} ${
+        nivelesTexto[datosAlumno.nivelEstudio]
+      }`;
+      const sedeNombre = sedesTexto[datosAlumno.sede];
 
       // Preparar datos completos para enviar a la API
       const datosCompletos = {
         ...datosAlumno,
         gradoSeccion,
         sedeNombre,
-      }
+      };
 
-      let response
-      let endpoint
-      let method
+      let response;
+      let endpoint;
+      let method;
 
       if (alumnoEditando) {
         // Editar alumno existente
-        endpoint = `${API_ENDPOINTS.EDITAR_ALUMNO}${alumnoEditando.id}`
-        method = "PUT"
+        endpoint = `${API_ENDPOINTS.EDITAR_ALUMNO}${alumnoEditando.id}`;
+        method = "PUT";
       } else {
         // Crear nuevo alumno
-        endpoint = API_ENDPOINTS.CREAR_ALUMNO
-        method = "POST"
+        endpoint = API_ENDPOINTS.CREAR_ALUMNO;
+        method = "POST";
       }
 
-      console.log(endpoint)
+      console.log(endpoint);
 
       response = await fetch(endpoint, {
         method: method,
@@ -167,34 +170,44 @@ export default function CrudAlumnos() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(datosCompletos),
-      })
+      });
 
-      const result = await response.json()
-      console.log(result)
+      const result = await response.json();
+      console.log(result);
 
       if (!response.ok) {
-        alert(result.error || `Error al ${alumnoEditando ? "actualizar" : "agregar"} el alumno`)
-        return
+        alert(
+          result.error ||
+            `Error al ${alumnoEditando ? "actualizar" : "agregar"} el alumno`
+        );
+        return;
       }
 
       // Actualizar la lista de alumnos
-      await obtenerAlumnos()
-      setModalAbierto(false)
-      setAlumnoEditando(null)
+      await obtenerAlumnos();
+      setModalAbierto(false);
+      setAlumnoEditando(null);
     } catch (error) {
-      console.error(`Error al ${alumnoEditando ? "actualizar" : "agregar"} alumno:`, error)
-      alert(`Error de conexión al ${alumnoEditando ? "actualizar" : "agregar"} alumno`)
+      console.error(
+        `Error al ${alumnoEditando ? "actualizar" : "agregar"} alumno:`,
+        error
+      );
+      alert(
+        `Error de conexión al ${
+          alumnoEditando ? "actualizar" : "agregar"
+        } alumno`
+      );
     }
-  }
+  };
 
   // Eliminar alumno
   const eliminarAlumno = async (id) => {
     if (!window.confirm("¿Está seguro que desea eliminar este alumno?")) {
-      return
+      return;
     }
 
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
 
       const response = await fetch(`${API_ENDPOINTS.ELIMINAR_ALUMNO}${id}`, {
         method: "DELETE",
@@ -202,28 +215,28 @@ export default function CrudAlumnos() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      })
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.clear()
-          navigate("/login")
-          return
+          localStorage.clear();
+          navigate("/login");
+          return;
         }
-        throw new Error("Error al eliminar el alumno")
+        throw new Error("Error al eliminar el alumno");
       }
 
-      const result = await response.json()
-      console.log(result)
+      const result = await response.json();
+      console.log(result);
 
       // Actualizar la lista de alumnos
-      await obtenerAlumnos()
-      alert("Alumno eliminado correctamente")
+      await obtenerAlumnos();
+      alert("Alumno eliminado correctamente");
     } catch (error) {
-      console.error("Error al eliminar alumno:", error)
-      alert("Error al eliminar el alumno")
+      console.error("Error al eliminar alumno:", error);
+      alert("Error al eliminar el alumno");
     }
-  }
+  };
 
   return (
     <div className="crud-container">
@@ -283,5 +296,5 @@ export default function CrudAlumnos() {
         </Box>
       </Container>
     </div>
-  )
+  );
 }

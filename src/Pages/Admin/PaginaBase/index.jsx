@@ -51,12 +51,6 @@ const tabs = [
     icon: <SchoolIcon />,
     path: "/admin/gestion-academica",
   },
-  {
-    label: "Mensajería",
-    value: "7",
-    icon: <SchoolIcon />,
-    path: "/admin/mensajeria",
-  },
 ];
 
 function PaginaBase() {
