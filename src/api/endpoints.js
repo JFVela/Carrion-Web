@@ -33,5 +33,5 @@ export const API_ENDPOINTS = {
 
   //API PARA NOTIFICACIONES
   OBTENER_NOTIFICACIONES: `${BASE_URL}/Docente/crudNotificar/listarNotificacion.php`,
-  CREAR_NOTIFICACION: `${BASE_URL}/Docente/PHPMailer/enviarCorreo.php`,
+  ENVIAR_CORREO: `${BASE_URL}/Docente/PHPMailer/enviarCorreo.php`,
 };

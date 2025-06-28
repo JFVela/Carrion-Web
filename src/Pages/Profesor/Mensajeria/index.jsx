@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -128,28 +126,26 @@ export default function CrudNotificaciones() {
         throw new Error("No se encontró el correo del alumno seleccionado");
       }
 
-      // Preparar payload
+      // Preparar payload con TODOS los datos necesarios
       const payload = {
+        // Datos para el correo
         email: alumno.correo,
         subject: nuevaNotificacion.asunto,
         message: nuevaNotificacion.mensaje,
+        // Datos para la base de datos
+        alumno_id: nuevaNotificacion.alumno_id,
+        emisor_tipo: nuevaNotificacion.emisor_tipo,
+        emisor_id: nuevaNotificacion.emisor_id,
       };
 
-      console.log("Enviando notificación:", {
-        alumno_id: nuevaNotificacion.alumno_id,
-        correo: alumno.correo,
-        asunto: nuevaNotificacion.asunto,
-        mensaje: nuevaNotificacion.mensaje,
-        payload,
-      });
+      console.log("Enviando notificación completa:", payload);
 
-      // Realizar petición
-      const response = await fetch(API_ENDPOINTS.CREAR_NOTIFICACION, {
+      // Realizar petición al endpoint que envía correo Y guarda en BD
+      const response = await fetch(API_ENDPOINTS.ENVIAR_CORREO, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Agregar token si es necesario
-          // Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Ahora necesario para la BD
         },
         body: JSON.stringify(payload),
       });
@@ -165,15 +161,19 @@ export default function CrudNotificaciones() {
       const resultado = await response.json();
 
       if (resultado.success) {
-        mostrarSnackbar("✅ Notificación enviada correctamente", "success");
+        mostrarSnackbar(
+          "✅ Correo enviado y notificación guardada correctamente",
+          "success"
+        );
         setModalAbierto(false);
+        // Recargar la lista de notificaciones para mostrar la nueva
         obtenerNotificaciones();
       } else {
         throw new Error(resultado.error || "Error desconocido");
       }
     } catch (error) {
       console.error("Error al enviar:", error);
-      mostrarSnackbar(`❌ Error al enviar: ${error.message}`, "error");
+      mostrarSnackbar(`❌ Error al procesar: ${error.message}`, "error");
     } finally {
       setLoading(false);
     }
