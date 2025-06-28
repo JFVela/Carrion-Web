@@ -24,4 +24,11 @@ export const API_ENDPOINTS = {
   OBTENER_NIVEL: `${BASE_URL}/Admin/crudNivel/listarNivel.php`,
   OBTENER_GRADOS: `${BASE_URL}/Admin/crudGrados/listarGrados.php`,
 
+  //API PARA ASISTENCIA
+  GRADOS_ASISTENCIA: `${BASE_URL}/Docente/crudAsistencia/obtenerGrados.php`,
+  ALUMNOS_FILTRADOS: `${BASE_URL}/Docente/crudAsistencia/alumnosFiltrados.php`,
+  GUARDAR_ASISTENCIA: `${BASE_URL}/Docente/crudAsistencia/guardarAsistencia.php`,
+  MODIFICAR_ASISTENCIA: `${BASE_URL}/Docente/crudAsistencia/modificarAsistencia.php`,
+  SEDES_ASISTENCIA: `${BASE_URL}/Docente/crudAsistencia/obtenerSedes.php`,
+
 };

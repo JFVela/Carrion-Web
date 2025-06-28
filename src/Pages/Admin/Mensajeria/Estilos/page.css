@@ -1,0 +1,55 @@
+.crud-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f0ff 0%, #e8eaff 100%);
+  padding: 2rem 1rem;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #673ab7;
+  color: white;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.header-title {
+  font-weight: 700 !important;
+  color: #333;
+}
+
+.toolbar-paper {
+  margin-bottom: 1.5rem;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.table-paper {
+  border-radius: 8px !important;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.footer {
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+@media (max-width: 600px) {
+  .crud-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .header-container {
+    flex-direction: column;
+    text-align: center;
+  }
+}

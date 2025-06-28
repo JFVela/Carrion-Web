@@ -13,53 +13,32 @@ import { TabContext } from "@mui/lab";
 import { useState, useEffect } from "react";
 import Navegador from "../../../Componentes/NavTabs.jsx";
 
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
-import AutoStoriesIcon from "@mui/icons-material/AutoStories";
-import Face4Icon from "@mui/icons-material/Face4";
-import SchoolIcon from "@mui/icons-material/School";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import GradeIcon from "@mui/icons-material/Grade";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 const tabs = [
   {
-    label: "Dashboard",
+    label: "Inicio",
     value: "1",
-    icon: <SpaceDashboardIcon />,
-    path: "/admin",
+    icon: <AssignmentTurnedInIcon />,
+    path: "/profesor",
   },
   {
-    label: "Alumnos",
+    label: "Asistencias",
     value: "2",
-    icon: <PeopleAltIcon />,
-    path: "/admin/gestion-alumnos",
+    icon: <AssignmentTurnedInIcon />,
+    path: "/profesor/tomar-asistencia",
   },
   {
-    label: "Profesores",
+    label: "Asignar Notas",
     value: "3",
-    icon: <Face4Icon />,
-    path: "/admin/gestion-profesores",
-  },
-  {
-    label: "Cursos",
-    value: "4",
-    icon: <AutoStoriesIcon />,
-    path: "/admin/gestion-cursos",
-  },
-  {
-    label: "Gestión Académica",
-    value: "5",
-    icon: <SchoolIcon />,
-    path: "/admin/gestion-academica",
-  },
-  {
-    label: "Mensajería",
-    value: "7",
-    icon: <SchoolIcon />,
-    path: "/admin/mensajeria",
+    icon: <GradeIcon />,
+    path: "/profesor/colocar-notas",
   },
 ];
 
-function PaginaBase() {
+function PaginaBaseprofesor() {
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -153,4 +132,4 @@ function PaginaBase() {
   );
 }
 
-export default PaginaBase;
+export default PaginaBaseprofesor;
