@@ -115,7 +115,15 @@ export default function AsistenciaPage() {
         },
       });
       if (!response.ok) throw new Error();
-      setGrados(await response.json());
+      const gradosData = await response.json();
+
+      // Filtrar duplicados por nombre
+      const gradosUnicos = gradosData.filter(
+        (grado, index, self) =>
+          index === self.findIndex((g) => g.nombre === grado.nombre)
+      );
+
+      setGrados(gradosUnicos);
     } catch {
       setGrados([
         { id: 1, nombre: "1° Primaria" },
@@ -132,8 +140,11 @@ export default function AsistenciaPage() {
       setError("Debe seleccionar sede y grado");
       return;
     }
+
     setLoading(true);
     setError("");
+    setSuccess("");
+
     try {
       const token = getAuthToken();
       const url = `${API_ENDPOINTS.ALUMNOS_FILTRADOS}?sede=${sedeSeleccionada}&grado=${gradoSeleccionado}`;
@@ -143,18 +154,22 @@ export default function AsistenciaPage() {
           "Content-Type": "application/json",
         },
       });
+
       if (!response.ok) throw new Error();
+
       const data = await response.json();
       setAlumnos(data);
+
       const asistenciasIniciales = {};
       let tieneAsistenciaHoy = false;
+
       data.forEach((alumno) => {
         if (alumno.estado_asistencia) {
           tieneAsistenciaHoy = true;
           asistenciasIniciales[alumno.id] = {
             id: alumno.id,
             estado: alumno.estado_asistencia,
-            observaciones: "",
+            observaciones: alumno.observaciones || "",
           };
         } else {
           asistenciasIniciales[alumno.id] = {
@@ -164,6 +179,7 @@ export default function AsistenciaPage() {
           };
         }
       });
+
       setAsistencias(asistenciasIniciales);
       setHayAsistenciaHoy(tieneAsistenciaHoy);
       setMostrandoAlumnos(true);
@@ -185,24 +201,29 @@ export default function AsistenciaPage() {
     const asistenciasParaGuardar = Object.values(asistencias).filter(
       (a) => a.estado !== ""
     );
+
     if (asistenciasParaGuardar.length === 0) {
       setError("Debe marcar al menos un alumno");
       return;
     }
+
     setLoading(true);
     setError("");
     setSuccess("");
+
     try {
       const token = getAuthToken();
       const endpoint = hayAsistenciaHoy
         ? API_ENDPOINTS.MODIFICAR_ASISTENCIA
         : API_ENDPOINTS.GUARDAR_ASISTENCIA;
       const method = hayAsistenciaHoy ? "PUT" : "POST";
+
       const payload = asistenciasParaGuardar.map((a) => ({
         id: a.id,
         estado: a.estado,
         observaciones: a.observaciones || "",
       }));
+
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -211,16 +232,31 @@ export default function AsistenciaPage() {
         },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error();
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Error en la respuesta del servidor"
+        );
+      }
+
+      const result = await response.json();
+
       setSuccess(
         hayAsistenciaHoy
           ? "Asistencia actualizada correctamente"
           : "Asistencia guardada correctamente"
       );
+
       setHayAsistenciaHoy(true);
-      setTimeout(() => mostrarAlumnos(), 1000);
-    } catch {
-      setError("Error al guardar la asistencia");
+
+      // SOLUCION: Recargar los datos después de guardar/actualizar
+      setTimeout(async () => {
+        await mostrarAlumnos();
+        setSuccess(""); // Limpiar mensaje de éxito después de recargar
+      }, 1500);
+    } catch (error) {
+      setError(`Error al guardar la asistencia: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -277,6 +313,7 @@ export default function AsistenciaPage() {
             <PeopleIcon sx={{ mr: 1, color: "primary.main" }} />
             <Typography variant="h6">Seleccionar Sede y Grado</Typography>
           </Box>
+
           <FiltrosSection>
             <FormControl fullWidth>
               <InputLabel>Sede</InputLabel>
@@ -292,6 +329,7 @@ export default function AsistenciaPage() {
                 ))}
               </Select>
             </FormControl>
+
             <FormControl fullWidth disabled={!sedeSeleccionada}>
               <InputLabel>Grado</InputLabel>
               <Select
@@ -306,6 +344,7 @@ export default function AsistenciaPage() {
                 ))}
               </Select>
             </FormControl>
+
             <Button
               variant="contained"
               onClick={mostrarAlumnos}
@@ -317,6 +356,7 @@ export default function AsistenciaPage() {
             >
               Mostrar Alumnos
             </Button>
+
             {mostrandoAlumnos && (
               <Button
                 variant="outlined"
@@ -335,6 +375,7 @@ export default function AsistenciaPage() {
           {error}
         </Alert>
       )}
+
       {success && (
         <Alert severity="success" sx={{ mb: 2 }}>
           {success}
@@ -404,6 +445,7 @@ export default function AsistenciaPage() {
                   : "Guardar Asistencia"}
               </Button>
             </Box>
+
             <section>
               {alumnos.map((alumno) => (
                 <AlumnoCard key={alumno.id}>
@@ -415,6 +457,7 @@ export default function AsistenciaPage() {
                       ID: {alumno.id}
                     </Typography>
                   </Box>
+
                   <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
                     <InputLabel>Estado</InputLabel>
                     <Select
@@ -433,6 +476,7 @@ export default function AsistenciaPage() {
                       <MenuItem value="AUSENTE">Ausente</MenuItem>
                     </Select>
                   </FormControl>
+
                   <TextField
                     fullWidth
                     size="small"
@@ -450,12 +494,14 @@ export default function AsistenciaPage() {
                     }
                     sx={{ flex: 2, minWidth: 160 }}
                   />
+
                   <EstadoBox>
                     {getEstadoChip(asistencias[alumno.id]?.estado || "")}
                   </EstadoBox>
                 </AlumnoCard>
               ))}
             </section>
+
             <Box
               sx={{
                 display: "flex",
