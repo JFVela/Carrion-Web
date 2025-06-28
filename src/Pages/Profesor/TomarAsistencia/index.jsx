@@ -12,8 +12,6 @@ import {
   TextField,
   Alert,
   Box,
-  Grid,
-  Paper,
   CircularProgress,
   Container,
 } from "@mui/material";
@@ -25,14 +23,51 @@ import {
   Warning as WarningIcon,
   Clear as ClearIcon,
 } from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
 import { API_ENDPOINTS } from "../../../api/endpoints";
+
+// Styled components
+const FiltrosSection = styled("section")(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  alignItems: "flex-end",
+  [theme.breakpoints.down("sm")]: {
+    flexDirection: "column",
+    gap: theme.spacing(1),
+  },
+}));
+
+const AlumnoCard = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: theme.spacing(2),
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(1),
+  background: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[1],
+  [theme.breakpoints.down("sm")]: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: theme.spacing(1),
+  },
+}));
+
+const EstadoBox = styled("div")({
+  minWidth: 100,
+  display: "flex",
+  justifyContent: "center",
+});
 
 export default function AsistenciaPage() {
   const [sedes, setSedes] = useState([]);
   const [grados, setGrados] = useState([]);
   const [alumnos, setAlumnos] = useState([]);
   const [sedeSeleccionada, setSedeSeleccionada] = useState("");
-  const [gradoSeleccionado, setGradoSeleccionado] = useState(""); // Declare the variable here
+  const [gradoSeleccionado, setGradoSeleccionado] = useState("");
   const [asistencias, setAsistencias] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -40,18 +75,15 @@ export default function AsistenciaPage() {
   const [mostrandoAlumnos, setMostrandoAlumnos] = useState(false);
   const [hayAsistenciaHoy, setHayAsistenciaHoy] = useState(false);
 
-  // Obtener token del localStorage
-  const getAuthToken = () => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("token") || "";
-    }
-    return "";
-  };
+  const getAuthToken = () =>
+    typeof window !== "undefined" ? localStorage.getItem("token") || "" : "";
 
-  // Cargar sedes y grados al montar el componente
   useEffect(() => {
-    cargarSedes();
-    cargarGrados();
+    (async () => {
+      await cargarSedes();
+      await cargarGrados();
+    })();
+    // eslint-disable-next-line
   }, []);
 
   const cargarSedes = async () => {
@@ -63,18 +95,10 @@ export default function AsistenciaPage() {
           "Content-Type": "application/json",
         },
       });
-
-      if (!response.ok) throw new Error("Error al cargar sedes");
-
-      const data = await response.json();
-      setSedes(data);
-      setLoading(false);
-    } catch (err) {
-      console.error("Error al cargar sedes:", err);
-      // ---------- Fallback so the preview keeps working ----------
-      const demoSedes = [{ id: 1, nombre: "Sede Demo" }];
-      setSedes(demoSedes);
-      setLoading(false);
+      if (!response.ok) throw new Error();
+      setSedes(await response.json());
+    } catch {
+      setSedes([{ id: 1, nombre: "Sede Demo" }]);
       setError(
         "No se pudo conectar al servidor de sedes. Se muestran datos de ejemplo."
       );
@@ -90,21 +114,13 @@ export default function AsistenciaPage() {
           "Content-Type": "application/json",
         },
       });
-
-      if (!response.ok) throw new Error("Error al cargar grados");
-
-      const data = await response.json();
-      setGrados(data);
-      setLoading(false);
-    } catch (err) {
-      console.error("Error al cargar grados:", err);
-      // ---------- Fallback so the preview keeps working ----------
-      const demoGrados = [
+      if (!response.ok) throw new Error();
+      setGrados(await response.json());
+    } catch {
+      setGrados([
         { id: 1, nombre: "1° Primaria" },
         { id: 2, nombre: "2° Primaria" },
-      ];
-      setGrados(demoGrados);
-      setLoading(false);
+      ]);
       setError(
         "No se pudo conectar al servidor de grados. Se muestran datos de ejemplo."
       );
@@ -116,30 +132,22 @@ export default function AsistenciaPage() {
       setError("Debe seleccionar sede y grado");
       return;
     }
-
     setLoading(true);
     setError("");
-
     try {
       const token = getAuthToken();
       const url = `${API_ENDPOINTS.ALUMNOS_FILTRADOS}?sede=${sedeSeleccionada}&grado=${gradoSeleccionado}`;
-
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-
-      if (!response.ok) throw new Error("Error al cargar alumnos");
-
+      if (!response.ok) throw new Error();
       const data = await response.json();
       setAlumnos(data);
-
-      // Inicializar asistencias basado en si ya hay registros del día
       const asistenciasIniciales = {};
-      let tieneAsistenciaHoy = hayAsistenciaHoy; // Preservar el estado anterior
-
+      let tieneAsistenciaHoy = false;
       data.forEach((alumno) => {
         if (alumno.estado_asistencia) {
           tieneAsistenciaHoy = true;
@@ -156,12 +164,10 @@ export default function AsistenciaPage() {
           };
         }
       });
-
       setAsistencias(asistenciasIniciales);
       setHayAsistenciaHoy(tieneAsistenciaHoy);
       setMostrandoAlumnos(true);
-    } catch (err) {
-      console.error("Error al cargar alumnos:", err);
+    } catch {
       setError("Error al cargar los alumnos");
     } finally {
       setLoading(false);
@@ -171,10 +177,7 @@ export default function AsistenciaPage() {
   const actualizarAsistencia = (alumnoId, campo, valor) => {
     setAsistencias((prev) => ({
       ...prev,
-      [alumnoId]: {
-        ...prev[alumnoId],
-        [campo]: valor,
-      },
+      [alumnoId]: { ...prev[alumnoId], [campo]: valor },
     }));
   };
 
@@ -182,53 +185,41 @@ export default function AsistenciaPage() {
     const asistenciasParaGuardar = Object.values(asistencias).filter(
       (a) => a.estado !== ""
     );
-
     if (asistenciasParaGuardar.length === 0) {
       setError("Debe marcar al menos un alumno");
       return;
     }
-
     setLoading(true);
     setError("");
     setSuccess("");
-
     try {
       const token = getAuthToken();
       const endpoint = hayAsistenciaHoy
         ? API_ENDPOINTS.MODIFICAR_ASISTENCIA
         : API_ENDPOINTS.GUARDAR_ASISTENCIA;
       const method = hayAsistenciaHoy ? "PUT" : "POST";
-
-      // Transformar datos al formato esperado por tu API PHP
-      const payload = asistenciasParaGuardar.map((asistencia) => ({
-        id: asistencia.id,
-        estado: asistencia.estado,
-        observaciones: asistencia.observaciones || "",
+      const payload = asistenciasParaGuardar.map((a) => ({
+        id: a.id,
+        estado: a.estado,
+        observaciones: a.observaciones || "",
       }));
-
       const response = await fetch(endpoint, {
-        method: method,
+        method,
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
-
-      if (!response.ok) throw new Error("Error al guardar asistencia");
-
-      const result = await response.json();
+      if (!response.ok) throw new Error();
       setSuccess(
         hayAsistenciaHoy
           ? "Asistencia actualizada correctamente"
           : "Asistencia guardada correctamente"
       );
       setHayAsistenciaHoy(true);
-
-      // Comentar o eliminar esta línea que causa el problema:
-      // setTimeout(() => mostrarAlumnos(), 1000);
-    } catch (err) {
-      console.error("Error al guardar asistencia:", err);
+      setTimeout(() => mostrarAlumnos(), 1000);
+    } catch {
       setError("Error al guardar la asistencia");
     } finally {
       setLoading(false);
@@ -259,147 +250,131 @@ export default function AsistenciaPage() {
     setSuccess("");
   };
 
+  // Resumen
+  const resumen = {
+    PUNTUAL: Object.values(asistencias).filter((a) => a.estado === "PUNTUAL")
+      .length,
+    TARDE: Object.values(asistencias).filter((a) => a.estado === "TARDE")
+      .length,
+    AUSENTE: Object.values(asistencias).filter((a) => a.estado === "AUSENTE")
+      .length,
+  };
+
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Encabezado */}
-      <Box sx={{ mb: 4 }}>
-        <Typography
-          variant="h3"
-          component="h1"
-          gutterBottom
-          sx={{ fontWeight: "bold", color: "text.primary" }}
-        >
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" fontWeight="bold" gutterBottom>
           Sistema de Asistencia Estudiantil
         </Typography>
-        <Typography variant="h6" color="text.secondary">
+        <Typography variant="subtitle1" color="text.secondary">
           Gestiona la asistencia diaria de los estudiantes
         </Typography>
       </Box>
 
-      {/* Filtros */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 2 }}>
         <CardContent>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <PeopleIcon sx={{ mr: 1, color: "primary.main" }} />
-            <Typography variant="h6" component="h2">
-              Seleccionar Sede y Grado
-            </Typography>
+            <Typography variant="h6">Seleccionar Sede y Grado</Typography>
           </Box>
-
-          <Grid container spacing={3} alignItems="flex-end">
-            <Grid item xs={12} md={4}>
-              <FormControl fullWidth>
-                <InputLabel>Sede</InputLabel>
-                <Select
-                  value={sedeSeleccionada}
-                  onChange={(e) => setSedeSeleccionada(e.target.value)}
-                  label="Sede"
-                >
-                  {sedes.map((sede) => (
-                    <MenuItem key={sede.id} value={sede.id.toString()}>
-                      {sede.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <FormControl fullWidth disabled={!sedeSeleccionada}>
-                <InputLabel>Grado</InputLabel>
-                <Select
-                  value={gradoSeleccionado}
-                  onChange={(e) => setGradoSeleccionado(e.target.value)}
-                  label="Grado"
-                >
-                  {grados.map((grado) => (
-                    <MenuItem key={grado.id} value={grado.id.toString()}>
-                      {grado.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <Button
-                  variant="contained"
-                  onClick={mostrarAlumnos}
-                  disabled={!sedeSeleccionada || !gradoSeleccionado || loading}
-                  startIcon={
-                    loading ? <CircularProgress size={20} /> : <RefreshIcon />
-                  }
-                  sx={{ flex: 1 }}
-                >
-                  Mostrar Alumnos
-                </Button>
-                {mostrandoAlumnos && (
-                  <Button
-                    variant="outlined"
-                    onClick={resetearFormulario}
-                    startIcon={<ClearIcon />}
-                  >
-                    Limpiar
-                  </Button>
-                )}
-              </Box>
-            </Grid>
-          </Grid>
+          <FiltrosSection>
+            <FormControl fullWidth>
+              <InputLabel>Sede</InputLabel>
+              <Select
+                value={sedeSeleccionada}
+                onChange={(e) => setSedeSeleccionada(e.target.value)}
+                label="Sede"
+              >
+                {sedes.map((sede) => (
+                  <MenuItem key={sede.id} value={sede.id.toString()}>
+                    {sede.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth disabled={!sedeSeleccionada}>
+              <InputLabel>Grado</InputLabel>
+              <Select
+                value={gradoSeleccionado}
+                onChange={(e) => setGradoSeleccionado(e.target.value)}
+                label="Grado"
+              >
+                {grados.map((grado) => (
+                  <MenuItem key={grado.id} value={grado.id.toString()}>
+                    {grado.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              onClick={mostrarAlumnos}
+              disabled={!sedeSeleccionada || !gradoSeleccionado || loading}
+              startIcon={
+                loading ? <CircularProgress size={20} /> : <RefreshIcon />
+              }
+              sx={{ minWidth: 160 }}
+            >
+              Mostrar Alumnos
+            </Button>
+            {mostrandoAlumnos && (
+              <Button
+                variant="outlined"
+                onClick={resetearFormulario}
+                startIcon={<ClearIcon />}
+              >
+                Limpiar
+              </Button>
+            )}
+          </FiltrosSection>
         </CardContent>
       </Card>
 
-      {/* Alertas */}
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} icon={<WarningIcon />}>
           {error}
         </Alert>
       )}
-
       {success && (
         <Alert severity="success" sx={{ mb: 2 }}>
           {success}
         </Alert>
       )}
 
-      {/* Información del día */}
       {mostrandoAlumnos && (
         <Card sx={{ mb: 2 }}>
-          <CardContent>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <CalendarIcon sx={{ mr: 1, color: "primary.main" }} />
-                <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-                  Fecha:{" "}
-                  {new Date().toLocaleDateString("es-ES", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </Typography>
-              </Box>
-              <Chip
-                label={
-                  hayAsistenciaHoy
-                    ? "Modificando asistencia existente"
-                    : "Registrando nueva asistencia"
-                }
-                color={hayAsistenciaHoy ? "primary" : "default"}
-                variant={hayAsistenciaHoy ? "filled" : "outlined"}
-              />
+          <CardContent
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <CalendarIcon sx={{ mr: 1, color: "primary.main" }} />
+              <Typography variant="body1">
+                Fecha:{" "}
+                {new Date().toLocaleDateString("es-ES", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </Typography>
             </Box>
+            <Chip
+              label={
+                hayAsistenciaHoy
+                  ? "Modificando asistencia existente"
+                  : "Registrando nueva asistencia"
+              }
+              color={hayAsistenciaHoy ? "primary" : "default"}
+              variant={hayAsistenciaHoy ? "filled" : "outlined"}
+            />
           </CardContent>
         </Card>
       )}
 
-      {/* Lista de alumnos */}
       {mostrandoAlumnos && alumnos.length > 0 && (
         <Card>
           <CardContent>
@@ -408,7 +383,7 @@ export default function AsistenciaPage() {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                mb: 3,
+                mb: 2,
               }}
             >
               <Typography variant="h6">
@@ -421,7 +396,6 @@ export default function AsistenciaPage() {
                 startIcon={
                   loading ? <CircularProgress size={20} /> : <SaveIcon />
                 }
-                color="primary"
               >
                 {loading
                   ? "Guardando..."
@@ -430,128 +404,87 @@ export default function AsistenciaPage() {
                   : "Guardar Asistencia"}
               </Button>
             </Box>
-
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <section>
               {alumnos.map((alumno) => (
-                <Paper
-                  key={alumno.id}
-                  elevation={1}
-                  sx={{ p: 2, "&:hover": { elevation: 2 } }}
-                >
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={3}>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{ fontWeight: "medium" }}
-                      >
-                        {alumno.nombre} {alumno.apellido1} {alumno.apellido2}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        ID: {alumno.id}
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12} md={3}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Estado</InputLabel>
-                        <Select
-                          value={asistencias[alumno.id]?.estado || ""}
-                          onChange={(e) =>
-                            actualizarAsistencia(
-                              alumno.id,
-                              "estado",
-                              e.target.value
-                            )
-                          }
-                          label="Estado"
-                        >
-                          <MenuItem value="PUNTUAL">Puntual</MenuItem>
-                          <MenuItem value="TARDE">Tarde</MenuItem>
-                          <MenuItem value="AUSENTE">Ausente</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-
-                    <Grid item xs={12} md={4}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        multiline
-                        rows={2}
-                        label="Observaciones"
-                        placeholder="Observaciones (opcional)"
-                        value={asistencias[alumno.id]?.observaciones || ""}
-                        onChange={(e) =>
-                          actualizarAsistencia(
-                            alumno.id,
-                            "observaciones",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </Grid>
-
-                    <Grid item xs={12} md={2} sx={{ textAlign: "center" }}>
-                      {getEstadoChip(asistencias[alumno.id]?.estado || "")}
-                    </Grid>
-                  </Grid>
-                </Paper>
+                <AlumnoCard key={alumno.id}>
+                  <Box sx={{ flex: 2 }}>
+                    <Typography fontWeight="medium">
+                      {alumno.nombre} {alumno.apellido1} {alumno.apellido2}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      ID: {alumno.id}
+                    </Typography>
+                  </Box>
+                  <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
+                    <InputLabel>Estado</InputLabel>
+                    <Select
+                      value={asistencias[alumno.id]?.estado || ""}
+                      onChange={(e) =>
+                        actualizarAsistencia(
+                          alumno.id,
+                          "estado",
+                          e.target.value
+                        )
+                      }
+                      label="Estado"
+                    >
+                      <MenuItem value="PUNTUAL">Puntual</MenuItem>
+                      <MenuItem value="TARDE">Tarde</MenuItem>
+                      <MenuItem value="AUSENTE">Ausente</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    multiline
+                    rows={2}
+                    label="Observaciones"
+                    placeholder="Observaciones (opcional)"
+                    value={asistencias[alumno.id]?.observaciones || ""}
+                    onChange={(e) =>
+                      actualizarAsistencia(
+                        alumno.id,
+                        "observaciones",
+                        e.target.value
+                      )
+                    }
+                    sx={{ flex: 2, minWidth: 160 }}
+                  />
+                  <EstadoBox>
+                    {getEstadoChip(asistencias[alumno.id]?.estado || "")}
+                  </EstadoBox>
+                </AlumnoCard>
               ))}
+            </section>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-around",
+                mt: 3,
+                bgcolor: "primary.50",
+                borderRadius: 2,
+                p: 2,
+              }}
+            >
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="h5" color="success.main" fontWeight="bold">
+                  {resumen.PUNTUAL}
+                </Typography>
+                <Typography variant="body2">Puntuales</Typography>
+              </Box>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="h5" color="warning.main" fontWeight="bold">
+                  {resumen.TARDE}
+                </Typography>
+                <Typography variant="body2">Tardanzas</Typography>
+              </Box>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="h5" color="error.main" fontWeight="bold">
+                  {resumen.AUSENTE}
+                </Typography>
+                <Typography variant="body2">Ausentes</Typography>
+              </Box>
             </Box>
-
-            {/* Resumen de asistencia */}
-            <Paper sx={{ mt: 3, p: 2, bgcolor: "primary.50" }}>
-              <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
-                Resumen de Asistencia
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={4} sx={{ textAlign: "center" }}>
-                  <Typography
-                    variant="h4"
-                    sx={{ color: "success.main", fontWeight: "bold" }}
-                  >
-                    {
-                      Object.values(asistencias).filter(
-                        (a) => a.estado === "PUNTUAL"
-                      ).length
-                    }
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Puntuales
-                  </Typography>
-                </Grid>
-                <Grid item xs={4} sx={{ textAlign: "center" }}>
-                  <Typography
-                    variant="h4"
-                    sx={{ color: "warning.main", fontWeight: "bold" }}
-                  >
-                    {
-                      Object.values(asistencias).filter(
-                        (a) => a.estado === "TARDE"
-                      ).length
-                    }
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Tardanzas
-                  </Typography>
-                </Grid>
-                <Grid item xs={4} sx={{ textAlign: "center" }}>
-                  <Typography
-                    variant="h4"
-                    sx={{ color: "error.main", fontWeight: "bold" }}
-                  >
-                    {
-                      Object.values(asistencias).filter(
-                        (a) => a.estado === "AUSENTE"
-                      ).length
-                    }
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Ausentes
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Paper>
           </CardContent>
         </Card>
       )}
