@@ -132,15 +132,16 @@ export default function GestionAcademicaPage() {
           {
             method: "PUT",
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
+               Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+             
             },
             body: JSON.stringify({
-              docenteId: datosAsignacion.docenteId,
-              sedeId: datosAsignacion.sedeId,
-              nivelId: datosAsignacion.nivelId,
-              gradoId: datosAsignacion.gradoId,
-              cursoId: datosAsignacion.cursoId,
+              id_profesor: datosAsignacion.docenteId,
+              id_sede: datosAsignacion.sedeId,
+              id_nivel: datosAsignacion.nivelId,
+              id_grado: datosAsignacion.gradoId,
+              id_curso: datosAsignacion.cursoId,
             }),
           }
         );
@@ -151,6 +152,15 @@ export default function GestionAcademicaPage() {
         }
       } else {
         // Crear nueva asignación
+        console.log("► URL POST crear asignación:", API_ENDPOINTS.CREAR_ASIGNACION);
+console.log("► Payload:", {
+  docenteId: datosAsignacion.docenteId,
+  sedeId:   datosAsignacion.sedeId,
+  nivelId:  datosAsignacion.nivelId,
+  gradoId:  datosAsignacion.gradoId,
+  cursoId:  datosAsignacion.cursoId,
+});
+console.log("► Token:", localStorage.getItem("token"));
         const respuesta = await fetch(API_ENDPOINTS.CREAR_ASIGNACION, {
           method: "POST",
           headers: {
@@ -158,11 +168,11 @@ export default function GestionAcademicaPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            docenteId: datosAsignacion.docenteId,
-            sedeId: datosAsignacion.sedeId,
-            nivelId: datosAsignacion.nivelId,
-            gradoId: datosAsignacion.gradoId,
-            cursoId: datosAsignacion.cursoId,
+             id_profesor: datosAsignacion.docenteId,
+              id_sede: datosAsignacion.sedeId,
+              id_nivel: datosAsignacion.nivelId,
+              id_grado: datosAsignacion.gradoId,
+              id_curso: datosAsignacion.cursoId,
           }),
         });
 
