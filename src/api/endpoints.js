@@ -18,7 +18,7 @@ export const API_ENDPOINTS = {
 
   OBTENER_ASIGNACIONES: `${BASE_URL}/Admin/crudAsignaciones/nuevolistar.php`,
   CREAR_ASIGNACION: `${BASE_URL}/Admin/crudAsignaciones/nuevasignacion.php`,
-  EDITAR_ASIGNACION: `${BASE_URL}/Admin/crudAsignaciones/editarAsignaciones.php`,
+  EDITAR_ASIGNACION: `${BASE_URL}/Admin/crudAsignaciones/modificarAsignacion.php`,
 
   OBTENER_SEDES: `${BASE_URL}/Admin/crudSedes/listarSedes.php`,
   OBTENER_NIVEL: `${BASE_URL}/Admin/crudNivel/listarNivel.php`,

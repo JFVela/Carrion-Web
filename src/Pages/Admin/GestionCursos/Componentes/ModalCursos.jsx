@@ -182,50 +182,7 @@ export default function ModalCurso({ open, onClose, curso, onGuardar }) {
                 </FormControl>
               </div>
 
-              {/* Select de Área */}
-              <div className="campo-completo">
-                <FormControl
-                  fullWidth
-                  variant="outlined"
-                  margin="dense"
-                  error={!!errores.area}
-                  required
-                >
-                  <InputLabel>Área</InputLabel>
-                  <Select
-                    name="area"
-                    value={formData.area}
-                    label="Área"
-                    onChange={manejarCambio}
-                    className="campo-formulario"
-                    displayEmpty
-                    MenuProps={{
-                      PaperProps: {
-                        style: {
-                          maxHeight: 300,
-                          width: 250,
-                        },
-                      },
-                    }}
-                  >
-                    <em>Seleccione el área</em>
-                    {areas.map((area) => (
-                      <MenuItem key={area.valor} value={area.valor}>
-                        {area.nombre}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errores.area && (
-                    <Typography
-                      variant="caption"
-                      color="error"
-                      sx={{ mt: 0.5, ml: 1.5 }}
-                    >
-                      {errores.area}
-                    </Typography>
-                  )}
-                </FormControl>
-              </div>
+           
             </div>
           </section>
         </DialogContent>

@@ -19,7 +19,7 @@ export default function GestionAcademicaPage() {
   const [ordenamiento, setOrdenamiento] = useState({ campo: "id", direccion: "asc" });
 
   // Modal
-  const [modalAbierto, setModalAbierto]           = useState(false);
+  const [modalAbierto, setModalAbierto]             = useState(false);
   const [asignacionEditando, setAsignacionEditando] = useState(null);
 
   const navigate = useNavigate();
@@ -50,11 +50,7 @@ export default function GestionAcademicaPage() {
         throw new Error("Error en la respuesta del servidor");
       }
       const data = await response.json();
-      // Mapeamos id_clase a id para mantener compatibilidad
-      const mapped = data.map((a) => ({
-        ...a,
-        id: a.id_clase
-      }));
+      const mapped = data.map((a) => ({ ...a, id: a.id_clase }));
       setAsignaciones(mapped);
     } catch (error) {
       console.error("Error al obtener asignaciones:", error);
@@ -74,7 +70,7 @@ export default function GestionAcademicaPage() {
         a.nombre_sede,
         a.nombre_grado,
         a.nombre_nivel,
-        a.nombre_aula
+        a.nombre_aula,
       ].some((campo) => campo?.toLowerCase().includes(b))
     );
   }, [asignaciones, busqueda]);
@@ -118,7 +114,13 @@ export default function GestionAcademicaPage() {
       const token = localStorage.getItem("token");
       const resp = await fetch(
         `${API_ENDPOINTS.EDITAR_ASIGNACION}?id=${id}`,
-        { method: "DELETE", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       if (!resp.ok) throw new Error("Error al eliminar asignación");
       await obtenerAsignaciones(token);
@@ -134,20 +136,29 @@ export default function GestionAcademicaPage() {
   const manejarGuardar = async (datos) => {
     try {
       const token = localStorage.getItem("token");
-      let resp;
+      let resp, body;
+
       if (asignacionEditando) {
+        // ACTUALIZAR PROFESOR
         resp = await fetch(
           `${API_ENDPOINTS.EDITAR_ASIGNACION}?id=${asignacionEditando.id}`,
           {
             method: "PUT",
-            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({ id_profesor: datos.docenteId }),
           }
         );
       } else {
+        // CREAR NUEVA ASIGNACIÓN
         resp = await fetch(API_ENDPOINTS.CREAR_ASIGNACION, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             id_profesor: datos.docenteId,
             id_sede:     datos.sedeId,
@@ -157,15 +168,22 @@ export default function GestionAcademicaPage() {
           }),
         });
       }
-      const body = await resp.json();
+
+      // Leer JSON una sola vez
+      body = await resp.json();
       if (!resp.ok) {
-        const msg = body.error || "Error al guardar asignación";
-        throw new Error(msg);
+        throw new Error(body.error || body.mensaje || "Error al guardar asignación");
       }
+
+      // Mostrar mensaje de éxito
+      if (asignacionEditando) {
+        setSuccessMsg(body.mensaje || "Profesor actualizado correctamente");
+      } else {
+        setSuccessMsg("La asignación fue exitosa");
+      }
+
+      // Refrescar lista y cerrar modal
       await obtenerAsignaciones(token);
-      setSuccessMsg(
-        asignacionEditando ? "Asignación actualizada" : "Asignación creada"
-      );
       setOpenSuccess(true);
       setModalAbierto(false);
     } catch (error) {
@@ -214,7 +232,11 @@ export default function GestionAcademicaPage() {
         onClose={() => setOpenError(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={() => setOpenError(false)} severity="error" sx={{ width: "100%" }}>
+        <Alert
+          onClose={() => setOpenError(false)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
           {errorMsg}
         </Alert>
       </Snackbar>
@@ -225,7 +247,11 @@ export default function GestionAcademicaPage() {
         onClose={() => setOpenSuccess(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={() => setOpenSuccess(false)} severity="success" sx={{ width: "100%" }}>
+        <Alert
+          onClose={() => setOpenSuccess(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
           {successMsg}
         </Alert>
       </Snackbar>

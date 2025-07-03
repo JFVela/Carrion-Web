@@ -1,7 +1,7 @@
 // Definición de las columnas de la tabla de gestión académica
 export const COLUMNAS_TABLA_GESTION = [
   { key: "id", label: "ID", sortable: true },
-  { key: "nombre_profesor", label: "Profesor", sortable: true },
+  { key: "nombres_profe", label: "Profesor", sortable: true },
   { key: "nombre_curso", label: "Curso", sortable: true },
   { key: "nombre_sede", label: "Sede", sortable: true },
   { key: "salon", label: "Salón", sortable: true },
