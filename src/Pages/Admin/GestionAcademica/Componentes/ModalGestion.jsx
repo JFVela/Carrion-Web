@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -29,24 +29,32 @@ export default function ModalAsignacionDocente({
   onClose,
   asignacion,
   onGuardar,
+  isEditing = false,
 }) {
-  // Estados para los datos de la API
-  const [docentes, setDocentes] = useState([]);
+  const token = localStorage.getItem("token");
+
+  // Listas maestras sólo para creación
   const [sedes, setSedes] = useState([]);
   const [niveles, setNiveles] = useState([]);
+
+  // Docentes siempre necesarios para cambio
+  const [docentes, setDocentes] = useState([]);
+
+  // Dependientes de nivel
   const [grados, setGrados] = useState([]);
   const [cursos, setCursos] = useState([]);
 
-  // Estados de carga
-  const [cargandoDocentes, setCargandoDocentes] = useState(false);
-  const [cargandoSedes, setCargandoSedes] = useState(false);
-  const [cargandoNiveles, setCargandoNiveles] = useState(false);
-  const [cargandoGrados, setCargandoGrados] = useState(false);
-  const [cargandoCursos, setCargandoCursos] = useState(false);
-
-  // Estados de error
+  // Estado de carga y error
+  const [loading, setLoading] = useState({
+    sedes: false,
+    niveles: false,
+    docentes: false,
+    grados: false,
+    cursos: false,
+  });
   const [errorCarga, setErrorCarga] = useState("");
 
+  // Formulario y errores de validación
   const [formData, setFormData] = useState({
     docenteId: "",
     sedeId: "",
@@ -54,625 +62,219 @@ export default function ModalAsignacionDocente({
     gradoId: "",
     cursoId: "",
   });
-
   const [busquedaDocente, setBusquedaDocente] = useState("");
   const [docenteSeleccionado, setDocenteSeleccionado] = useState(null);
   const [errores, setErrores] = useState({});
 
-  // Función para obtener el token
-  const obtenerToken = () => {
-    return localStorage.getItem("token");
-  };
-
-  // Función para manejar errores de API
-  const manejarErrorAPI = (error, mensaje) => {
-    console.error(mensaje, error);
-    setErrorCarga(`${mensaje}: ${error.message}`);
-  };
-
-  // Función para obtener docentes
-  const obtenerDocentes = async () => {
-    setCargandoDocentes(true);
+  // Helper de fetch
+  const fetchData = async (url, setter, key, label) => {
+    setLoading((l) => ({ ...l, [key]: true }));
     try {
-      const token = obtenerToken();
-      const response = await fetch(API_ENDPOINTS.OBTENER_PROFESORES, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener docentes");
-      }
-
-      const data = await response.json();
-      setDocentes(data);
-    } catch (error) {
-      manejarErrorAPI(error, "Error al cargar docentes");
+      const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!resp.ok) throw new Error(label);
+      const data = await resp.json();
+      setter(data);
+    } catch (e) {
+      setErrorCarga(`${label}: ${e.message}`);
     } finally {
-      setCargandoDocentes(false);
+      setLoading((l) => ({ ...l, [key]: false }));
     }
   };
 
-  // Función para obtener sedes
-  const obtenerSedes = async () => {
-    setCargandoSedes(true);
-    try {
-      const token = obtenerToken();
-      const response = await fetch(API_ENDPOINTS.OBTENER_SEDES, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener sedes");
-      }
-
-      const data = await response.json();
-      setSedes(data);
-    } catch (error) {
-      manejarErrorAPI(error, "Error al cargar sedes");
-    } finally {
-      setCargandoSedes(false);
-    }
-  };
-
-  // Función para obtener niveles
-  const obtenerNiveles = async () => {
-    setCargandoNiveles(true);
-    try {
-      const token = obtenerToken();
-      const response = await fetch(API_ENDPOINTS.OBTENER_NIVEL, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener niveles");
-      }
-
-      const data = await response.json();
-      setNiveles(data);
-    } catch (error) {
-      manejarErrorAPI(error, "Error al cargar niveles");
-    } finally {
-      setCargandoNiveles(false);
-    }
-  };
-
-  // Función para obtener grados
-  const obtenerGrados = async () => {
-    setCargandoGrados(true);
-    try {
-      const token = obtenerToken();
-      const response = await fetch(API_ENDPOINTS.OBTENER_GRADOS, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener grados");
-      }
-
-      const data = await response.json();
-      setGrados(data);
-    } catch (error) {
-      manejarErrorAPI(error, "Error al cargar grados");
-    } finally {
-      setCargandoGrados(false);
-    }
-  };
-
-  // Función para obtener cursos
-  const obtenerCursos = async () => {
-    setCargandoCursos(true);
-    try {
-      const token = obtenerToken();
-      const response = await fetch(API_ENDPOINTS.OBTENER_CURSOS, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener cursos");
-      }
-
-      const data = await response.json();
-      setCursos(data);
-    } catch (error) {
-      manejarErrorAPI(error, "Error al cargar cursos");
-    } finally {
-      setCargandoCursos(false);
-    }
-  };
-
-  // Cargar todos los datos cuando se abre el modal
+  // Carga inicial cuando se abre el modal
   useEffect(() => {
-    if (open) {
-      setErrorCarga("");
-      obtenerDocentes();
-      obtenerSedes();
-      obtenerNiveles();
-      obtenerGrados();
-      obtenerCursos();
+    if (!open) return;
+    setErrorCarga("");
+
+    // Siempre cargar docentes para poder editar profesor
+    fetchData(API_ENDPOINTS.OBTENER_PROFESORES, setDocentes, "docentes", "docentes");
+
+    // Sólo en creación cargar sedes y niveles completos
+    if (!isEditing) {
+      fetchData(API_ENDPOINTS.OBTENER_SEDES, setSedes, "sedes", "sedes");
+      fetchData(API_ENDPOINTS.OBTENER_NIVEL, setNiveles, "niveles", "niveles");
     }
   }, [open]);
 
-  // Filtrar docentes según la búsqueda
-  const docentesFiltrados = useMemo(() => {
-    return docentes.filter(
-      (docente) =>
-        docente.nombreCompleto
-          ?.toLowerCase()
-          .includes(busquedaDocente.toLowerCase()) ||
-        docente.nombre?.toLowerCase().includes(busquedaDocente.toLowerCase()) ||
-        `${docente.nombre} ${docente.apellido1} ${docente.apellido2}`
-          .toLowerCase()
-          .includes(busquedaDocente.toLowerCase())
-    );
-  }, [docentes, busquedaDocente]);
-
-  // Cargar datos cuando se abre el modal para editar
+  // Cargar grados y cursos cuando cambia nivelId (solo si CREACIÓN)
   useEffect(() => {
+    if (isEditing) return;
+    if (!formData.nivelId) {
+      setGrados([]);
+      setCursos([]);
+      return;
+    }
+    // 1) grados por nivel
+    fetchData(
+      `${API_ENDPOINTS.OBTENER_GRADOSV2}?id_nivel=${formData.nivelId}`,
+      setGrados,
+      "grados",
+      "grados"
+    );
+    // 2) cursos por nivel
+    fetchData(
+      `${API_ENDPOINTS.OBTENER_CURSOSV2}?nivel=${formData.nivelId}`,
+      setCursos,
+      "cursos",
+      "cursos"
+    );
+  }, [formData.nivelId, isEditing]);
+
+  // Inicializar valores al abrir el modal (creación o edición)
+  useEffect(() => {
+    if (!open) return;
     if (asignacion) {
-      setFormData({
-        docenteId: asignacion.docenteId || "",
-        sedeId: asignacion.sedeId || "",
-        nivelId: asignacion.nivelId || "",
-        gradoId: asignacion.gradoId || "",
-        cursoId: asignacion.cursoId || "",
-      });
-      setDocenteSeleccionado(asignacion.docenteId || null);
+      // Edición: precargar sólo el valor existente
+      const { id_profesor, id_sede, id_nivel, id_grado, id_curso, nombre_sede, nombre_nivel, nombre_grado, nombre_curso } = asignacion;
+      setFormData({ docenteId: id_profesor, sedeId: id_sede, nivelId: id_nivel, gradoId: id_grado, cursoId: id_curso });
+      setDocenteSeleccionado(id_profesor);
+      // Precargar sedes y niveles para que el select muestre el valor actual
+      setSedes([{ id: id_sede, nombre: nombre_sede }]);
+      setNiveles([{ id: id_nivel, nombre: nombre_nivel }]);
+      // Precargar grado y curso sin llamadas adicionales
+      setGrados([{ id: id_grado, nombre: nombre_grado }]);
+      setCursos([{ id: id_curso, nombre: nombre_curso }]);
     } else {
-      // Resetear el formulario si es una nueva asignación
-      setFormData({
-        docenteId: "",
-        sedeId: "",
-        nivelId: "",
-        gradoId: "",
-        cursoId: "",
-      });
+      // Creación: limpiar formulario y listas dependientes
+      setFormData({ docenteId: "", sedeId: "", nivelId: "", gradoId: "", cursoId: "" });
       setDocenteSeleccionado(null);
+      setSedes([]);
+      setNiveles([]);
+      setGrados([]);
+      setCursos([]);
     }
     setBusquedaDocente("");
     setErrores({});
   }, [asignacion, open]);
 
-  const seleccionarDocente = (docente) => {
-    setDocenteSeleccionado(docente.id);
-    setFormData({
-      ...formData,
-      docenteId: docente.id,
-    });
-    // Limpiar error cuando se selecciona un docente
-    if (errores.docenteId) {
-      setErrores({
-        ...errores,
-        docenteId: "",
-      });
-    }
+  // Filtrar docentes por búsqueda
+  const docentesFiltrados = useMemo(
+    () => docentes.filter((d) =>
+      (d.nombreCompleto || `${d.nombre} ${d.apellido1} ${d.apellido2}`)
+        .toLowerCase()
+        .includes(busquedaDocente.toLowerCase())
+    ),
+    [docentes, busquedaDocente]
+  );
+
+  const seleccionarDocente = (d) => {
+    setDocenteSeleccionado(d.id);
+    setFormData((f) => ({ ...f, docenteId: d.id }));
+    setErrores((e) => ({ ...e, docenteId: "" }));
   };
 
   const manejarCambio = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-    // Limpiar error cuando el usuario selecciona
-    if (errores[name]) {
-      setErrores({
-        ...errores,
-        [name]: "",
+    setFormData((f) => ({ ...f, [name]: value }));
+    setErrores((e) => ({ ...e, [name]: "" }));
+  };
+
+  const validar = () => {
+    const err = {};
+    if (!formData.docenteId) err.docenteId = "Debe seleccionar un docente";
+    if (!asignacion) {
+      ["sedeId", "nivelId", "gradoId", "cursoId"].forEach((c) => {
+        if (!formData[c]) err[c] = "Obligatorio";
       });
     }
+    setErrores(err);
+    return !Object.keys(err).length;
   };
 
-  const validarFormulario = () => {
-    const nuevosErrores = {};
-    let esValido = true;
-
-    // Validar campos requeridos
-    if (!formData.docenteId) {
-      nuevosErrores.docenteId = "Debe seleccionar un docente";
-      esValido = false;
-    }
-
-    const camposRequeridos = ["sedeId", "nivelId", "gradoId", "cursoId"];
-    camposRequeridos.forEach((campo) => {
-      if (!formData[campo] || formData[campo].toString().trim() === "") {
-        nuevosErrores[campo] = "El campo es obligatorio";
-        esValido = false;
-      }
-    });
-
-    setErrores(nuevosErrores);
-    return esValido;
-  };
-
-  const manejarEnvio = async (e) => {
+  const manejarEnvio = (e) => {
     e.preventDefault();
-    if (validarFormulario()) {
-      try {
-        onGuardar(formData);
-      } catch (error) {
-        console.error("Error al procesar asignación:", error);
-      }
-    }
+    if (!validar()) return;
+    onGuardar(formData);
   };
 
-  // Función para obtener el nombre del docente seleccionado
-  const obtenerNombreDocente = (docenteId) => {
-    const docente = docentes.find((d) => d.id === docenteId);
-    return (
-      docente?.nombreCompleto || docente?.nombre || "Docente no encontrado"
-    );
+  const obtenerNombreDocente = (id) => {
+    const d = docentes.find((x) => x.id === id);
+    return d?.nombreCompleto || `${d?.nombre} ${d?.apellido1}` || "";
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="lg"
-      fullWidth
-      className="modal-curso"
-    >
-      <DialogTitle className="modal-titulo">
-        {asignacion
-          ? "Editar Asignación de Docente"
-          : "Nueva Asignación de Docente"}
-      </DialogTitle>
-
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogTitle>{asignacion ? "Editar Asignación" : "Nueva Asignación"}</DialogTitle>
       <form onSubmit={manejarEnvio}>
-        <DialogContent
-          className="modal-contenido"
-          sx={{ maxHeight: "70vh", overflowY: "auto" }}
-        >
-          {errorCarga && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {errorCarga}
-            </Alert>
-          )}
-
-          <section className="fila-formulario">
-            {/* Columna izquierda - Tabla de docentes */}
-            <div className="columna-mitad">
-              <section className="seccion-formulario">
-                <Typography variant="h6" className="titulo-seccion">
-                  Seleccionar Docente
-                </Typography>
-                <div className="grupo-campos">
-                  <div className="campo-completo">
-                    <TextField
-                      label="Buscar docente"
-                      value={busquedaDocente}
-                      onChange={(e) => setBusquedaDocente(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      margin="dense"
-                      className="campo-formulario"
-                      placeholder="Escriba el nombre del docente..."
-                      disabled={cargandoDocentes}
-                    />
-                  </div>
-                  {errores.docenteId && (
-                    <Typography
-                      variant="caption"
-                      color="error"
-                      sx={{ mt: 0.5, ml: 1.5 }}
-                    >
-                      {errores.docenteId}
-                    </Typography>
-                  )}
-                  <div className="campo-completo">
-                    <Box sx={{ mt: 2, maxHeight: 350, overflow: "auto" }}>
-                      {cargandoDocentes ? (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            p: 2,
-                          }}
-                        >
-                          <CircularProgress />
-                        </Box>
-                      ) : (
-                        <TableContainer component={Paper} variant="outlined">
-                          <Table stickyHeader size="small">
-                            <TableHead>
-                              <TableRow>
-                                <TableCell sx={{ fontWeight: "bold" }}>
-                                  ID
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: "bold" }}>
-                                  Nombre Completo
-                                </TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {docentesFiltrados.map((docente) => (
-                                <TableRow
-                                  key={docente.id}
-                                  onClick={() => seleccionarDocente(docente)}
-                                  sx={{
-                                    cursor: "pointer",
-                                    backgroundColor:
-                                      docenteSeleccionado === docente.id
-                                        ? "#e3f2fd"
-                                        : "inherit",
-                                    "&:hover": {
-                                      backgroundColor:
-                                        docenteSeleccionado === docente.id
-                                          ? "#bbdefb"
-                                          : "#f5f5f5",
-                                    },
-                                  }}
-                                >
-                                  <TableCell>{docente.id}</TableCell>
-                                  <TableCell>
-                                    {docente.nombreCompleto ||
-                                      `${docente.nombre} ${docente.apellido1} ${docente.apellido2}`}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                      )}
-                    </Box>
-                  </div>
-                </div>
-              </section>
-            </div>
-
-            {/* Columna derecha - Selects */}
-            <div className="columna-mitad">
-              <section className="seccion-formulario">
-                <Typography variant="h6" className="titulo-seccion">
-                  Información de Asignación
-                </Typography>
-                <div className="grupo-campos">
-                  {/* Select de Sede */}
-                  <div className="campo-completo">
-                    <FormControl
-                      fullWidth
-                      variant="outlined"
-                      margin="dense"
-                      error={!!errores.sedeId}
-                      required
-                    >
-                      <InputLabel>Sede</InputLabel>
-                      <Select
-                        name="sedeId"
-                        value={formData.sedeId}
-                        label="Sede"
-                        onChange={manejarCambio}
-                        className="campo-formulario"
-                        disabled={cargandoSedes}
+        <DialogContent sx={{ overflowY: "auto", maxHeight: "70vh" }}>
+          {errorCarga && <Alert severity="error">{errorCarga}</Alert>}
+          <Box display="flex" gap={2}>
+            {/* Izquierda: docentes */}
+            <Box flex={1}>
+              <TextField
+                label="Buscar docente"
+                fullWidth
+                margin="dense"
+                value={busquedaDocente}
+                onChange={(e) => setBusquedaDocente(e.target.value)}
+                disabled={loading.docentes}
+              />
+              <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
+                <Table stickyHeader size="small">
+                  <TableHead>
+                    <TableRow><TableCell>ID</TableCell><TableCell>Docente</TableCell></TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {loading.docentes ? (
+                      <TableRow><TableCell colSpan={2} align="center"><CircularProgress size={24}/></TableCell></TableRow>
+                    ) : (docentesFiltrados.map((d) => (
+                      <TableRow
+                        key={d.id}
+                        onClick={() => seleccionarDocente(d)}
+                        sx={{ cursor: "pointer", backgroundColor: d.id === docenteSeleccionado ? "rgba(0,0,255,0.1)" : "inherit" }}
                       >
-                        <MenuItem value="">
-                          <em>Seleccione una sede</em>
-                        </MenuItem>
-                        {sedes.map((sede) => (
-                          <MenuItem key={sede.id} value={sede.id}>
-                            {sede.nombre}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {errores.sedeId && (
-                        <Typography
-                          variant="caption"
-                          color="error"
-                          sx={{ mt: 0.5, ml: 1.5 }}
-                        >
-                          {errores.sedeId}
-                        </Typography>
-                      )}
-                    </FormControl>
-                  </div>
+                        <TableCell>{d.id}</TableCell>
+                        <TableCell>{obtenerNombreDocente(d.id)}</TableCell>
+                      </TableRow>
+                    )))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              {errores.docenteId && <Typography color="error">{errores.docenteId}</Typography>}
+            </Box>
+            {/* Derecha: selects */}
+            <Box flex={1}>
+              <FormControl fullWidth margin="dense" disabled={isEditing || loading.sedes} error={!!errores.sedeId}>
+                <InputLabel>Sede</InputLabel>
+                <Select name="sedeId" value={formData.sedeId} label="Sede" onChange={manejarCambio}>
+                  <MenuItem value=""><em>Seleccione</em></MenuItem>
+                  {sedes.map((s) => (<MenuItem key={s.id} value={s.id}>{s.nombre}</MenuItem>))}
+                </Select>
+                {errores.sedeId && <Typography color="error">{errores.sedeId}</Typography>}
+              </FormControl>
 
-                  {/* Select de Nivel */}
-                  <div className="campo-completo">
-                    <FormControl
-                      fullWidth
-                      variant="outlined"
-                      margin="dense"
-                      error={!!errores.nivelId}
-                      required
-                    >
-                      <InputLabel>Nivel</InputLabel>
-                      <Select
-                        name="nivelId"
-                        value={formData.nivelId}
-                        label="Nivel"
-                        onChange={manejarCambio}
-                        className="campo-formulario"
-                        disabled={cargandoNiveles}
-                        MenuProps={{
-                          PaperProps: {
-                            style: {
-                              maxHeight: 300,
-                              width: 250,
-                            },
-                          },
-                        }}
-                      >
-                        <MenuItem value="">
-                          <em>Seleccione un nivel</em>
-                        </MenuItem>
-                        {niveles.map((nivel) => (
-                          <MenuItem key={nivel.id} value={nivel.id}>
-                            {nivel.nombre}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {errores.nivelId && (
-                        <Typography
-                          variant="caption"
-                          color="error"
-                          sx={{ mt: 0.5, ml: 1.5 }}
-                        >
-                          {errores.nivelId}
-                        </Typography>
-                      )}
-                    </FormControl>
-                  </div>
+              <FormControl fullWidth margin="dense" disabled={isEditing || loading.niveles} error={!!errores.nivelId}>
+                <InputLabel>Nivel</InputLabel>
+                <Select name="nivelId" value={formData.nivelId} label="Nivel" onChange={manejarCambio}>
+                  <MenuItem value=""><em>Seleccione</em></MenuItem>
+                  {niveles.map((n) => (<MenuItem key={n.id} value={n.id}>{n.nombre}</MenuItem>))}
+                </Select>
+                {errores.nivelId && <Typography color="error">{errores.nivelId}</Typography>}
+              </FormControl>
 
-                  {/* Select de Grado */}
-                  <div className="campo-completo">
-                    <FormControl
-                      fullWidth
-                      variant="outlined"
-                      margin="dense"
-                      error={!!errores.gradoId}
-                      required
-                    >
-                      <InputLabel>Grado</InputLabel>
-                      <Select
-                        name="gradoId"
-                        value={formData.gradoId}
-                        label="Grado"
-                        onChange={manejarCambio}
-                        className="campo-formulario"
-                        disabled={cargandoGrados}
-                        MenuProps={{
-                          PaperProps: {
-                            style: {
-                              maxHeight: 300,
-                              width: 250,
-                            },
-                          },
-                        }}
-                      >
-                        <MenuItem value="">
-                          <em>Seleccione un grado</em>
-                        </MenuItem>
-                        {grados.map((grado) => (
-                          <MenuItem key={grado.id} value={grado.id}>
-                            {grado.nombre}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {errores.gradoId && (
-                        <Typography
-                          variant="caption"
-                          color="error"
-                          sx={{ mt: 0.5, ml: 1.5 }}
-                        >
-                          {errores.gradoId}
-                        </Typography>
-                      )}
-                    </FormControl>
-                  </div>
+              <FormControl fullWidth margin="dense" disabled={isEditing || loading.grados} error={!!errores.gradoId}>
+                <InputLabel>Grado</InputLabel>
+                <Select name="gradoId" value={formData.gradoId} label="Grado" onChange={manejarCambio}>
+                  <MenuItem value=""><em>Seleccione</em></MenuItem>
+                  {grados.map((g) => (<MenuItem key={g.id} value={g.id}>{g.nombre}</MenuItem>))}
+                </Select>
+                {errores.gradoId && <Typography color="error">{errores.gradoId}</Typography>}
+              </FormControl>
 
-                  {/* Select de Curso */}
-                  <div className="campo-completo">
-                    <FormControl
-                      fullWidth
-                      variant="outlined"
-                      margin="dense"
-                      error={!!errores.cursoId}
-                      required
-                    >
-                      <InputLabel>Curso</InputLabel>
-                      <Select
-                        name="cursoId"
-                        value={formData.cursoId}
-                        label="Curso"
-                        onChange={manejarCambio}
-                        className="campo-formulario"
-                        disabled={cargandoCursos}
-                        MenuProps={{
-                          PaperProps: {
-                            style: {
-                              maxHeight: 300,
-                              width: 250,
-                            },
-                          },
-                        }}
-                      >
-                        <MenuItem value="">
-                          <em>Seleccione un curso</em>
-                        </MenuItem>
-                        {cursos.map((curso) => (
-                          <MenuItem key={curso.id} value={curso.id}>
-                            {curso.nombre}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {errores.cursoId && (
-                        <Typography
-                          variant="caption"
-                          color="error"
-                          sx={{ mt: 0.5, ml: 1.5 }}
-                        >
-                          {errores.cursoId}
-                        </Typography>
-                      )}
-                    </FormControl>
-                  </div>
-
-                  {/* Información del docente seleccionado */}
-                  {docenteSeleccionado && (
-                    <div className="campo-completo">
-                      <Box
-                        sx={{
-                          mt: 2,
-                          p: 2,
-                          backgroundColor: "#e8f5e8",
-                          border: "1px solid #4caf50",
-                          borderRadius: 1,
-                        }}
-                      >
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ fontWeight: "bold", color: "#2e7d32" }}
-                        >
-                          Docente Seleccionado:
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: "#2e7d32" }}>
-                          {obtenerNombreDocente(docenteSeleccionado)}
-                        </Typography>
-                      </Box>
-                    </div>
-                  )}
-                </div>
-              </section>
-            </div>
-          </section>
+              <FormControl fullWidth margin="dense" disabled={isEditing || loading.cursos} error={!!errores.cursoId}>
+                <InputLabel>Curso</InputLabel>
+                <Select name="cursoId" value={formData.cursoId} label="Curso" onChange={manejarCambio}>
+                  <MenuItem value=""><em>Seleccione</em></MenuItem>
+                  {cursos.map((c) => (<MenuItem key={c.id} value={c.id}>{c.nombre}</MenuItem>))}
+                </Select>
+                {errores.cursoId && <Typography color="error">{errores.cursoId}</Typography>}
+              </FormControl>
+            </Box>
+          </Box>
         </DialogContent>
-
-        <DialogActions className="modal-acciones">
-          <Button onClick={onClose} color="inherit" className="boton-cancelar">
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            className="boton-guardar"
-            disabled={
-              cargandoDocentes ||
-              cargandoSedes ||
-              cargandoNiveles ||
-              cargandoGrados ||
-              cargandoCursos
-            }
-          >
+        <DialogActions>
+          <Button onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="contained" disabled={Object.values(loading).some(x => x)}>
             {asignacion ? "Actualizar" : "Guardar"}
           </Button>
         </DialogActions>

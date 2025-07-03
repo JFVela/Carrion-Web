@@ -219,10 +219,14 @@ export default function AsistenciaPage() {
       const method = hayAsistenciaHoy ? "PUT" : "POST";
 
       const payload = asistenciasParaGuardar.map((a) => ({
+        id_sede:sedeSeleccionada,
+        id_nivel:1,
+        id_grado:gradoSeleccionado,
         id: a.id,
         estado: a.estado,
         observaciones: a.observaciones || "",
       }));
+console.log(payload);
 
       const response = await fetch(endpoint, {
         method,

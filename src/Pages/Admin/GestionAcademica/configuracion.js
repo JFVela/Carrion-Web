@@ -2,8 +2,8 @@
 export const COLUMNAS_TABLA_GESTION = [
   { key: "id", label: "ID", sortable: true },
   { key: "nombre_profesor", label: "Profesor", sortable: true },
-  { key: "curso", label: "Curso", sortable: true },
-  { key: "sede", label: "Sede", sortable: true },
+  { key: "nombre_curso", label: "Curso", sortable: true },
+  { key: "nombre_sede", label: "Sede", sortable: true },
   { key: "salon", label: "Salón", sortable: true },
   { key: "acciones", label: "Acciones", sortable: false },
 ]

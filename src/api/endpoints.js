@@ -16,13 +16,16 @@ export const API_ENDPOINTS = {
   CREAR_CURSO: `${BASE_URL}/Admin/crudCursos/agregarCurso.php`,
   EDITAR_CURSO: `${BASE_URL}/Admin/crudCursos/editarCurso.php?id=`,
 
-  OBTENER_ASIGNACIONES: `${BASE_URL}/Admin/crudAsignaciones/listarAsignaciones.php`,
-  CREAR_ASIGNACION: `${BASE_URL}/Admin/crudAsignaciones/agregarAsignaciones.php`,
+  OBTENER_ASIGNACIONES: `${BASE_URL}/Admin/crudAsignaciones/nuevolistar.php`,
+  CREAR_ASIGNACION: `${BASE_URL}/Admin/crudAsignaciones/nuevasignacion.php`,
   EDITAR_ASIGNACION: `${BASE_URL}/Admin/crudAsignaciones/editarAsignaciones.php`,
 
   OBTENER_SEDES: `${BASE_URL}/Admin/crudSedes/listarSedes.php`,
   OBTENER_NIVEL: `${BASE_URL}/Admin/crudNivel/listarNivel.php`,
   OBTENER_GRADOS: `${BASE_URL}/Admin/crudGrados/listarGrados.php`,
+  OBTENER_GRADOSV2: `${BASE_URL}/obtenerGrados.php`,
+  OBTENER_CURSOSV2: `${BASE_URL}/Admin/crudCursos/listarCursos.php`,
+
 
   //API PARA ASISTENCIA
   GRADOS_ASISTENCIA: `${BASE_URL}/Docente/crudAsistencia/obtenerGrados.php`,

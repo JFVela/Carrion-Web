@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Container, Typography } from "@mui/material";
+import { Container, Typography, Snackbar, Alert } from "@mui/material";
 import TablaGestionAcademica from "./Componentes/TablaGestion";
 import BarraHerramientasGestion from "./Componentes/BarraHerramientas";
 import ModalAsignacionDocente from "./Componentes/ModalGestion";
@@ -7,14 +7,21 @@ import { API_ENDPOINTS } from "../../../api/endpoints.js";
 import { useNavigate } from "react-router-dom";
 
 export default function GestionAcademicaPage() {
+  // Toasts
+  const [errorMsg, setErrorMsg]       = useState("");
+  const [openError, setOpenError]     = useState(false);
+  const [successMsg, setSuccessMsg]   = useState("");
+  const [openSuccess, setOpenSuccess] = useState(false);
+
+  // Datos y filtros
   const [asignaciones, setAsignaciones] = useState([]);
-  const [busqueda, setBusqueda] = useState("");
-  const [modalAbierto, setModalAbierto] = useState(false);
+  const [busqueda, setBusqueda]         = useState("");
+  const [ordenamiento, setOrdenamiento] = useState({ campo: "id", direccion: "asc" });
+
+  // Modal
+  const [modalAbierto, setModalAbierto]           = useState(false);
   const [asignacionEditando, setAsignacionEditando] = useState(null);
-  const [ordenamiento, setOrdenamiento] = useState({
-    campo: "id",
-    direccion: "asc",
-  });
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,7 +42,6 @@ export default function GestionAcademicaPage() {
           "Content-Type": "application/json",
         },
       });
-
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.clear();
@@ -43,27 +49,37 @@ export default function GestionAcademicaPage() {
         }
         throw new Error("Error en la respuesta del servidor");
       }
-
       const data = await response.json();
-      setAsignaciones(data);
+      // Mapeamos id_clase a id para mantener compatibilidad
+      const mapped = data.map((a) => ({
+        ...a,
+        id: a.id_clase
+      }));
+      setAsignaciones(mapped);
     } catch (error) {
-      console.error("Error al obtener las asignaciones:", error);
+      console.error("Error al obtener asignaciones:", error);
+      setErrorMsg("No se pudo cargar la lista");
+      setOpenError(true);
     }
   };
 
+  // Filtrado por búsqueda
   const asignacionesFiltradas = useMemo(() => {
     if (!busqueda.trim()) return asignaciones;
-    const busquedaLower = busqueda.toLowerCase();
-    return asignaciones.filter(
-      (asignacion) =>
-        asignacion.docenteNombre?.toLowerCase().includes(busquedaLower) ||
-        asignacion.cursoNombre?.toLowerCase().includes(busquedaLower) ||
-        asignacion.sedeNombre?.toLowerCase().includes(busquedaLower) ||
-        asignacion.gradoNombre?.toLowerCase().includes(busquedaLower) ||
-        asignacion.nivelNombre?.toLowerCase().includes(busquedaLower)
+    const b = busqueda.toLowerCase();
+    return asignaciones.filter((a) =>
+      [
+        a.nombre_profesor,
+        a.nombre_curso,
+        a.nombre_sede,
+        a.nombre_grado,
+        a.nombre_nivel,
+        a.nombre_aula
+      ].some((campo) => campo?.toLowerCase().includes(b))
     );
   }, [asignaciones, busqueda]);
 
+  // Ordenamiento
   const asignacionesOrdenadas = useMemo(() => {
     return [...asignacionesFiltradas].sort((a, b) => {
       if (a[ordenamiento.campo] < b[ordenamiento.campo]) {
@@ -80,7 +96,9 @@ export default function GestionAcademicaPage() {
     setOrdenamiento((prev) => ({
       campo,
       direccion:
-        prev.campo === campo && prev.direccion === "asc" ? "desc" : "asc",
+        prev.campo === campo && prev.direccion === "asc"
+          ? "desc"
+          : "asc",
     }));
   };
 
@@ -89,113 +107,80 @@ export default function GestionAcademicaPage() {
     setModalAbierto(true);
   };
 
-  const abrirModalEditar = (asignacion) => {
-    setAsignacionEditando(asignacion);
+  const abrirModalEditar = (registro) => {
+    setAsignacionEditando(registro);
     setModalAbierto(true);
   };
 
   const eliminarAsignacion = async (id) => {
-    if (window.confirm("¿Está seguro de eliminar esta asignación?")) {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          `${API_ENDPOINTS.EDITAR_ASIGNACION}?id=${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Error al eliminar la asignación");
-        }
-
-        // Actualizar la lista después de eliminar
-        await obtenerAsignaciones(token);
-      } catch (error) {
-        console.error("Error al eliminar asignación:", error);
-      }
+    if (!window.confirm("¿Está seguro de eliminar esta asignación?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      const resp = await fetch(
+        `${API_ENDPOINTS.EDITAR_ASIGNACION}?id=${id}`,
+        { method: "DELETE", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+      );
+      if (!resp.ok) throw new Error("Error al eliminar asignación");
+      await obtenerAsignaciones(token);
+      setSuccessMsg("Asignación eliminada");
+      setOpenSuccess(true);
+    } catch (error) {
+      console.error(error);
+      setErrorMsg("No se pudo eliminar la asignación");
+      setOpenError(true);
     }
   };
 
-  const manejarGuardar = async (datosAsignacion) => {
+  const manejarGuardar = async (datos) => {
     try {
       const token = localStorage.getItem("token");
-
+      let resp;
       if (asignacionEditando) {
-        // Editar asignación existente
-        const respuesta = await fetch(
+        resp = await fetch(
           `${API_ENDPOINTS.EDITAR_ASIGNACION}?id=${asignacionEditando.id}`,
           {
             method: "PUT",
-            headers: {
-               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json"
-             
-            },
-            body: JSON.stringify({
-              id_profesor: datosAsignacion.docenteId,
-              id_sede: datosAsignacion.sedeId,
-              id_nivel: datosAsignacion.nivelId,
-              id_grado: datosAsignacion.gradoId,
-              id_curso: datosAsignacion.cursoId,
-            }),
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ id_profesor: datos.docenteId }),
           }
         );
-
-        if (!respuesta.ok) {
-          const error = await respuesta.json();
-          throw new Error(error.message || "Error al actualizar la asignación");
-        }
       } else {
-        // Crear nueva asignación
-        console.log("► URL POST crear asignación:", API_ENDPOINTS.CREAR_ASIGNACION);
-console.log("► Payload:", {
-  docenteId: datosAsignacion.docenteId,
-  sedeId:   datosAsignacion.sedeId,
-  nivelId:  datosAsignacion.nivelId,
-  gradoId:  datosAsignacion.gradoId,
-  cursoId:  datosAsignacion.cursoId,
-});
-console.log("► Token:", localStorage.getItem("token"));
-        const respuesta = await fetch(API_ENDPOINTS.CREAR_ASIGNACION, {
+        resp = await fetch(API_ENDPOINTS.CREAR_ASIGNACION, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-             id_profesor: datosAsignacion.docenteId,
-              id_sede: datosAsignacion.sedeId,
-              id_nivel: datosAsignacion.nivelId,
-              id_grado: datosAsignacion.gradoId,
-              id_curso: datosAsignacion.cursoId,
+            id_profesor: datos.docenteId,
+            id_sede:     datos.sedeId,
+            id_nivel:    datos.nivelId,
+            id_grado:    datos.gradoId,
+            id_curso:    datos.cursoId,
           }),
         });
-
-        if (!respuesta.ok) {
-          const error = await respuesta.json();
-          throw new Error(error.message || "Error al guardar la asignación");
-        }
       }
-
-      // Actualizar la lista desde la BD después de guardar
+      const body = await resp.json();
+      if (!resp.ok) {
+        const msg = body.error || "Error al guardar asignación";
+        throw new Error(msg);
+      }
       await obtenerAsignaciones(token);
+      setSuccessMsg(
+        asignacionEditando ? "Asignación actualizada" : "Asignación creada"
+      );
+      setOpenSuccess(true);
       setModalAbierto(false);
     } catch (error) {
-      console.error("Error al guardar asignación:", error);
-      // Aquí podrías mostrar un mensaje de error al usuario
+      console.error(error);
+      setErrorMsg(error.message || "Error desconocido");
+      setOpenError(true);
     }
   };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" gutterBottom>
         Gestión Académica
       </Typography>
+
       <BarraHerramientasGestion
         busqueda={busqueda}
         setBusqueda={setBusqueda}
@@ -203,7 +188,9 @@ console.log("► Token:", localStorage.getItem("token"));
         totalAsignaciones={asignaciones.length}
         asignacionesFiltradas={asignacionesFiltradas.length}
         mostrarFiltrados={busqueda.trim() !== ""}
+        ordenarPor={ordenarPor}
       />
+
       <TablaGestionAcademica
         asignaciones={asignacionesOrdenadas}
         ordenamiento={ordenamiento}
@@ -212,12 +199,36 @@ console.log("► Token:", localStorage.getItem("token"));
         eliminarAsignacion={eliminarAsignacion}
         busqueda={busqueda}
       />
+
       <ModalAsignacionDocente
         open={modalAbierto}
         onClose={() => setModalAbierto(false)}
         asignacion={asignacionEditando}
         onGuardar={manejarGuardar}
+        isEditing={Boolean(asignacionEditando)}
       />
+
+      <Snackbar
+        open={openError}
+        autoHideDuration={6000}
+        onClose={() => setOpenError(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setOpenError(false)} severity="error" sx={{ width: "100%" }}>
+          {errorMsg}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={openSuccess}
+        autoHideDuration={4000}
+        onClose={() => setOpenSuccess(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setOpenSuccess(false)} severity="success" sx={{ width: "100%" }}>
+          {successMsg}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
