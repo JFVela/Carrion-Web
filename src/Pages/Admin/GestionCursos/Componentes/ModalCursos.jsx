@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -21,7 +19,6 @@ export default function ModalCurso({ open, onClose, curso, onGuardar }) {
   const [formData, setFormData] = useState({
     nombreCurso: "",
     nivel: "",
-    area: "",
   });
 
   const [errores, setErrores] = useState({});
@@ -32,32 +29,18 @@ export default function ModalCurso({ open, onClose, curso, onGuardar }) {
     { valor: 2, nombre: "Secundaria" },
   ];
 
-  // Datos de áreas académicas
-  const areas = [
-    { valor: 1, nombre: "Comunicación" },
-    { valor: 2, nombre: "Matemáticas" },
-    { valor: 3, nombre: "Ciencias Naturales" },
-    { valor: 4, nombre: "Ciencias Sociales" },
-    { valor: 5, nombre: "Arte y Cultura" },
-    { valor: 6, nombre: "Educación Física" },
-    { valor: 7, nombre: "Inglés" },
-    { valor: 8, nombre: "Computación" },
-  ];
-
   // Cargar datos del curso cuando se abre el modal para editar
   useEffect(() => {
     if (curso) {
       setFormData({
         nombreCurso: curso.nombre || "",
         nivel: curso.nivel || "",
-        area: curso.area || "",
       });
     } else {
       // Resetear el formulario si es un nuevo curso
       setFormData({
         nombreCurso: "",
         nivel: "",
-        area: "",
       });
     }
     setErrores({});
@@ -86,7 +69,7 @@ export default function ModalCurso({ open, onClose, curso, onGuardar }) {
     let esValido = true;
 
     // Validar campos requeridos
-    const camposRequeridos = ["nombreCurso", "nivel", "area"];
+    const camposRequeridos = ["nombreCurso", "nivel"];
 
     camposRequeridos.forEach((campo) => {
       if (!formData[campo] || formData[campo].toString().trim() === "") {
@@ -181,8 +164,6 @@ export default function ModalCurso({ open, onClose, curso, onGuardar }) {
                   )}
                 </FormControl>
               </div>
-
-           
             </div>
           </section>
         </DialogContent>

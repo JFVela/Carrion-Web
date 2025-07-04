@@ -42,7 +42,7 @@ export default function BarraHerramientas({
           onClick={abrirModalAgregar}
           className="boton-agregar"
         >
-          Agregar Alumno
+          Agregar Curso
         </Button>
       </Box>
 

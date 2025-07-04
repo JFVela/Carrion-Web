@@ -7,8 +7,8 @@ import { NombreProfesor, NotasTexto, NotasDivider } from "../../../Componentes/e
 const studentData = {
   institution: "I.E.P Daniel Alcides Carrión",
   academicYear: "2025",
-  studentName: "Carlos Rodríguez Mendoza",
-  studentId: "ID: SM-2023-0042",
+  studentName: "Matheo Carlos Mendoza",
+  studentId: "ID: 72596538",
   photoUrl: "https://randomuser.me/api/portraits/men/42.jpg",
   grade: "5to Año de Secundaria",
   section: "Sección A",

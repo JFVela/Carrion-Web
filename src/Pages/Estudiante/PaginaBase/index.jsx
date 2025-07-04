@@ -6,10 +6,14 @@ import {
   AppBar,
   useTheme,
   useMediaQuery,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import { TabContext } from "@mui/lab";
 import { useState, useEffect } from "react";
 import Navegador from "../../../Componentes/NavTabs.jsx";
+
+import LogoutIcon from "@mui/icons-material/Logout";
 
 import {
   Dashboard as DashboardIcon,
@@ -37,9 +41,6 @@ const tabs = [
   },
 ];
 
-
-
-
 function PaginaBase() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -47,20 +48,17 @@ function PaginaBase() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [mounted, setMounted] = useState(false);
 
-
-useEffect(() => {
-    const token = localStorage.getItem('token');
-    const rol = localStorage.getItem('rol');
-  if (!token || rol !== 'Alumno') {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const rol = localStorage.getItem("rol");
+    if (!token || rol !== "Alumno") {
       setMounted(true);
 
-      navigate('login');
+      navigate("login");
     } else {
       setMounted(true);
     }
   }, [navigate]);
-
-
 
   /*
 
@@ -74,6 +72,11 @@ useEffect(() => {
   const handleChange = (event, newValue) => {
     const selectedTab = tabs.find((tab) => tab.value === newValue);
     if (selectedTab) navigate(selectedTab.path);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
@@ -103,6 +106,15 @@ useEffect(() => {
             onChange={handleChange}
             isMobile={isMobile}
           />
+
+          {/* Botón de cerrar sesión */}
+          <Box sx={{ position: "absolute", right: 16, top: 8 }}>
+            <Tooltip title="Cerrar sesión">
+              <IconButton onClick={handleLogout} color="inherit">
+                <LogoutIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </AppBar>
 
         <Container

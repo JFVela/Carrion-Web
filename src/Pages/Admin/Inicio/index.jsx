@@ -1,5 +1,3 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import { Box, Typography, Paper, useTheme } from "@mui/material";
 import {
