@@ -66,8 +66,7 @@ La aplicación está desplegada en [Vercel](https://carrion-web.vercel.app), don
 
 ## Licencia
 
-Este proyecto actualmente no especifica licencia. Si deseas contribuir o reutilizar el código, contacta al autor.
-
+Todos los derechos reservados.
 ---
 
 Visita el proyecto en [GitHub](https://github.com/JFVela/Carrion-Web) o prueba la aplicación en [Vercel](https://carrion-web.vercel.app).
