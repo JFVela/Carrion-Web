@@ -33,7 +33,6 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Validar token existente al cargar el componente
   useEffect(() => {
     verificarTokenExistente();
   }, [location]);
@@ -50,10 +49,10 @@ const Login = () => {
         if (decoded.exp > ahora) {
           redirigirPorRol(rol);
         } else {
-          localStorage.clear(); // Token expirado
+          localStorage.clear();
         }
       } catch (error) {
-        localStorage.clear(); // Token inválido
+        localStorage.clear();
         console.error("Token inválido:", error);
       }
     }
@@ -134,6 +133,48 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      // ---------------------------------------------------------
+      // 🔵 VALIDACIÓN LOCAL PARA ALUMNO (usuario: alumno / pass: alumno)
+      // ---------------------------------------------------------
+      if (
+        formData.usuario.trim().toLowerCase() === "alumno" &&
+        formData.contrasena.trim().toLowerCase() === "alumno"
+      ) {
+        // Token falso con fecha futura (1 día)
+        const fakeToken = {
+          data: {
+            nombre: "Alumno",
+            apellido1: "",
+            apellido2: "",
+            rol: "Alumno",
+          },
+          exp: Math.floor(Date.now() / 1000) + 86400,
+        };
+
+        localStorage.setItem("token", JSON.stringify(fakeToken));
+        localStorage.setItem("rol", "Alumno");
+        localStorage.setItem(
+          "usuario",
+          JSON.stringify({
+            nombre: "Alumno",
+            apellido1: "",
+            apellido2: "",
+          })
+        );
+
+        mostrarExito("Bienvenido Alumno");
+        setIsLoading(false);
+
+        setTimeout(() => {
+          navigate("/");
+        }, 800);
+
+        return; // STOP → No llamar al backend
+      }
+
+      // ---------------------------------------------------------
+      // 🔵 LOGIN NORMAL (SI NO ES “alumno”)
+      // ---------------------------------------------------------
       const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: {
@@ -148,13 +189,9 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok && data.token) {
-        // Guardar token
         localStorage.setItem("token", data.token);
-
-        // Decodificar token
         const decoded = jwtDecode(data.token);
 
-        // Guardar datos del usuario
         localStorage.setItem(
           "usuario",
           JSON.stringify({
@@ -166,6 +203,7 @@ const Login = () => {
         localStorage.setItem("rol", decoded.data.rol);
 
         mostrarExito("¡Autenticación exitosa!");
+
         setTimeout(() => {
           redirigirPorRol(decoded.data.rol);
         }, 1000);
